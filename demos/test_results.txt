@@ -1,0 +1,49 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.11, pytest-9.1.1, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.11/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /Users/caleb/Desktop/School/Senior Design/folio/demos
+plugins: anyio-4.12.1, dash-4.1.0
+collecting ... collected 40 items
+
+tests/test_csv_storage.py::test_valid_row_is_normalized_and_accepted PASSED [  2%]
+tests/test_csv_storage.py::test_missing_required_fields_are_rejected PASSED [  5%]
+tests/test_csv_storage.py::test_malformed_values_are_rejected PASSED     [  7%]
+tests/test_csv_storage.py::test_csv_missing_a_required_column_is_rejected PASSED [ 10%]
+tests/test_csv_storage.py::test_valid_row_is_inserted_into_sqlite PASSED [ 12%]
+tests/test_csv_storage.py::test_duplicate_csv_record_is_not_inserted_twice PASSED [ 15%]
+tests/test_csv_storage.py::test_mixed_import_reports_each_row_type PASSED [ 17%]
+tests/test_csv_storage.py::test_import_preserves_normalized_data_and_source PASSED [ 20%]
+tests/test_rewards.py::test_one_task_earns_one_game_move PASSED          [ 22%]
+tests/test_rewards.py::test_task_awards_weighted_xp_and_points PASSED    [ 25%]
+tests/test_rewards.py::test_duplicate_task_completion_does_not_award_twice PASSED [ 27%]
+tests/test_rewards.py::test_two_different_tasks_earn_separate_rewards PASSED [ 30%]
+tests/test_rewards.py::test_consuming_move_changes_only_move_count PASSED [ 32%]
+tests/test_rewards.py::test_cannot_consume_move_when_none_are_available PASSED [ 35%]
+tests/test_rewards.py::test_lost_turn_does_not_change_rewards PASSED     [ 37%]
+tests/test_rewards.py::test_invalid_task_weight_is_rejected_without_processing_task PASSED [ 40%]
+tests/test_scheduling.py::test_valid_task_addition_and_lookup_by_id PASSED [ 42%]
+tests/test_scheduling.py::test_duplicate_task_id_is_rejected_without_replacing_task PASSED [ 45%]
+tests/test_scheduling.py::test_duplicate_signature_is_rejected_even_with_a_different_id PASSED [ 47%]
+tests/test_scheduling.py::test_adjacent_nonoverlapping_tasks_have_no_conflicts PASSED [ 50%]
+tests/test_scheduling.py::test_overlapping_cross_plan_tasks_report_conflict PASSED [ 52%]
+tests/test_scheduling.py::test_conflicting_addition_preserves_both_student_choices PASSED [ 55%]
+tests/test_scheduling.py::test_get_tasks_for_plan_filters_tasks PASSED   [ 57%]
+tests/test_scheduling.py::test_removal_updates_lookup_and_duplicate_signature_tracking PASSED [ 60%]
+tests/test_scheduling.py::test_valid_reschedule_updates_time_and_signature PASSED [ 62%]
+tests/test_scheduling.py::test_conflicting_reschedule_returns_conflict_and_keeps_original_time PASSED [ 65%]
+tests/test_scheduling.py::test_invalid_or_missing_reschedule_is_rejected PASSED [ 67%]
+tests/test_tictactoe.py::test_new_board_is_empty_and_starting_player_is_valid PASSED [ 70%]
+tests/test_tictactoe.py::test_legal_move_is_accepted_and_turn_changes PASSED [ 72%]
+tests/test_tictactoe.py::test_occupied_square_is_rejected_without_changing_it PASSED [ 75%]
+tests/test_tictactoe.py::test_out_of_range_and_noninteger_moves_are_rejected PASSED [ 77%]
+tests/test_tictactoe.py::test_horizontal_win_is_detected PASSED          [ 80%]
+tests/test_tictactoe.py::test_vertical_win_is_detected PASSED            [ 82%]
+tests/test_tictactoe.py::test_diagonal_win_is_detected PASSED            [ 85%]
+tests/test_tictactoe.py::test_tie_is_detected PASSED                     [ 87%]
+tests/test_tictactoe.py::test_new_game_clears_board_and_old_result PASSED [ 90%]
+tests/test_tictactoe.py::test_minimax_returns_a_legal_move_without_mutating_board PASSED [ 92%]
+tests/test_tictactoe.py::test_minimax_takes_immediate_winning_move PASSED [ 95%]
+tests/test_tictactoe.py::test_minimax_blocks_immediate_player_win PASSED [ 97%]
+tests/test_tictactoe.py::test_computer_never_overwrites_occupied_cells PASSED [100%]
+
+============================== 40 passed in 0.03s ==============================
