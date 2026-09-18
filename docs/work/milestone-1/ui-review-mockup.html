@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Folio M1 Review Mockup</title>
+<style>
+body{font:16px system-ui,sans-serif;margin:32px;max-width:1000px;color:#111;background:#fff}
+h1,h2{margin:0 0 12px}p{max-width:75ch}.flow{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 36px}.step{border:1px solid #777;padding:10px 12px;border-radius:6px}.screen{border:2px solid #222;border-radius:8px;margin:22px 0;padding:18px}.bar{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #aaa;padding-bottom:12px;margin-bottom:16px}.tab{border:1px solid #777;padding:6px 10px;border-radius:5px}.active{border:2px solid #111}.row{display:grid;grid-template-columns:1fr 1fr;gap:18px}.box{border:1px solid #999;padding:14px;border-radius:6px}.task{border-bottom:1px solid #ccc;padding:8px 0}.muted{color:#555;font-size:14px}button{font:inherit;padding:8px 12px}@media(max-width:700px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>Folio - client/advisor review mockup</h1>
+<p>This is a requirements-review sketch, not a final visual design. It exposes only workflows already specified in the approved project plan.</p>
+
+<div class="flow">
+<div class="step">1 Course data</div><div class="step">2 Choose work</div><div class="step">3 Build/edit plan</div><div class="step">4 Schedule</div><div class="step">5 Optional instructor feedback</div><div class="step">6 Follow through</div>
+</div>
+
+<section class="screen">
+<h2>Choose work</h2>
+<div class="bar"><span class="tab active">Choose work</span><span class="tab">Plan</span><span class="tab">Schedule</span><span class="tab">Progress</span></div>
+<div class="row">
+<div class="box"><strong>Course</strong><p>CSE 4101</p><strong>Work to address</strong><div class="task">Milestone 1</div><div class="task">Requirements document</div></div>
+<div class="box"><strong>Selected work</strong><p>Requirements document</p><button>Build plan</button></div>
+</div>
+</section>
+
+<section class="screen">
+<h2>Build and edit plan</h2>
+<div class="bar"><span class="tab">Choose work</span><span class="tab active">Plan</span><span class="tab">Schedule</span><span class="tab">Progress</span></div>
+<p><strong>Template:</strong> Catch-up plan</p>
+<div class="box"><div class="task">Draft assigned section &nbsp; <button>Edit</button></div><div class="task">Cross-review teammate section &nbsp; <button>Edit</button></div><div class="task">Merge final document &nbsp; <button>Edit</button></div></div>
+<p><button>Save plan</button></p>
+</section>
+
+<section class="screen">
+<h2>Schedule</h2>
+<div class="bar"><span class="tab">Choose work</span><span class="tab">Plan</span><span class="tab active">Schedule</span><span class="tab">Progress</span></div>
+<div class="row">
+<div class="box"><strong>Today</strong><div class="task">Draft assigned section</div><div class="task">Review requirements</div></div>
+<div class="box"><strong>This week</strong><div class="task">Cross-review teammate section</div><div class="task">Advisor/client review</div><div class="task">Merge final document</div></div>
+</div>
+</section>
+
+<section class="screen">
+<h2>Share for instructor feedback</h2>
+<p class="muted">Student controls what academic information is shared. Progress, reward, and game data are excluded.</p>
+<div class="row">
+<div class="box"><strong>Academic content selected for sharing</strong><div class="task">Course: CSE 4101</div><div class="task">Plan: Requirements document</div><div class="task">Scheduled tasks</div></div>
+<div class="box"><strong>Preview before sharing</strong><p>PDF &nbsp; DOCX &nbsp; Email preview</p><button>Review output</button></div>
+</div>
+<p><strong>After feedback:</strong> <button>Accept</button> <button>Adapt</button> <button>Reject</button></p>
+</section>
+
+<section class="screen">
+<h2>Follow through</h2>
+<div class="bar"><span class="tab">Choose work</span><span class="tab">Plan</span><span class="tab">Schedule</span><span class="tab active">Progress</span></div>
+<div class="box"><div class="task">Draft assigned section <button>Mark complete</button></div><div class="task">Advisor/client review <button>Reschedule</button> <button>Reminder</button></div></div>
+<p>Plan progress: 1 / 3 tasks complete</p>
+<p class="muted">Game and rewards are optional; planning remains usable without them.</p>
+</section>
+
+<h2>Review questions</h2>
+<ol>
+<li>Are these workflows reasonable?</li>
+<li>What requirements should be updated, added, or removed?</li>
+<li>How should the requirements be prioritized?</li>
+</ol>
+<p class="muted">Questions follow Florida Tech's senior-project document guidance.</p>
+</body>
+</html>
