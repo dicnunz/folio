@@ -30,5 +30,4 @@
 
 ## Performance Requirements
 
-- **P1.** The system shall complete student-initiated plan actions within **TBD with the client** seconds.
-- **P2.** The system shall generate a PDF, DOCX, or prepared instructor email within **TBD with the client** seconds for a plan containing up to **TBD with the client** tasks.
+TBD with the client before the Requirement Document is finalized.
