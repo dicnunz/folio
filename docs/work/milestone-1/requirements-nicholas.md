@@ -29,5 +29,3 @@
 - **I5.** The system shall exclude progress, reward, and game information from academic exports and prepared instructor emails.
 
 ## Performance Requirements
-
-TBD with the client before the Requirement Document is finalized.
