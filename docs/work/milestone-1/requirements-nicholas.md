@@ -29,3 +29,7 @@
 - **I5.** The system shall exclude progress, reward, and game information from academic exports and prepared instructor emails.
 
 ## Performance Requirements
+
+- **P1.** The system shall preserve the student’s entered and edited plan information when the plan is saved or revised.
+- **P2.** PDF, DOCX, and prepared email outputs shall accurately contain the academic plan information selected for sharing.
+- **P3.** The displayed task-completion and plan-progress information shall match the student’s saved task-completion status.
