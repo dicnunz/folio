@@ -1,0 +1,81 @@
+@startuml top-level-data-flow
+title Folio Top-Level Data Flow Diagram
+
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+}
+
+skinparam usecase {
+    BackgroundColor #E8F1F8
+    BorderColor #315B7D
+}
+
+skinparam database {
+    BackgroundColor #FFF4D6
+    BorderColor #806515
+}
+
+rectangle "Student" as Student
+rectangle "Instructor" as Instructor
+rectangle "Coursework\nCSV File" as CSVFile
+
+usecase "1.0\nManage\nCoursework" as Coursework
+usecase "2.0\nManage Plans\nand Feedback" as Planning
+usecase "3.0\nManage Schedule\nand Completion" as Scheduling
+usecase "4.0\nPrepare Academic\nSharing Outputs" as Sharing
+usecase "5.0\nManage Game\nand Rewards" as GameRewards
+
+database "D1\nCoursework\nRecords" as D1
+database "D2\nPlans and\nScheduled Tasks" as D2
+database "D3\nFeedback and\nPreferences" as D3
+database "D4\nGame and\nReward State" as D4
+
+Student --> Coursework : Manual coursework data\nCSV import request
+CSVFile --> Coursework : Coursework rows
+Coursework --> Student : Saved coursework\nValidation and import results
+Coursework --> D1 : Create, update,\nor delete coursework
+D1 --> Coursework : Stored coursework
+
+Student --> Planning : Coursework selection\nTemplate choice\nTask edits\nFeedback decisions
+Instructor --> Planning : Optional suggestions
+D1 --> Planning : Selected coursework
+Planning --> Student : Academic plan\nFeedback status
+Planning --> D2 : Plans, tasks,\nand revisions
+D2 --> Planning : Saved plan state
+Planning --> D3 : Suggestions and\ndecisions
+D3 --> Planning : Stored feedback
+
+Student --> Scheduling : Schedule request\nRescheduling request\nReminder settings\nCompletion change
+D2 --> Scheduling : Plans and tasks
+Scheduling --> D2 : Updated times,\nreminders, and status
+Scheduling --> Student : Daily or weekly schedule\nConflicts and progress
+Scheduling --> GameRewards : Qualifying task-\ncompletion event
+
+Student --> GameRewards : Enable or disable setting\nPlayer move
+D4 --> GameRewards : Saved game and\nreward state
+GameRewards --> D4 : Updated game and\nreward state
+GameRewards --> Student : Reward feedback\nGame board and result
+
+Student --> Sharing : Selected fields\nExport request\nEmail approval
+D1 --> Sharing : Selected coursework data
+D2 --> Sharing : Selected plan and task data
+D3 --> Sharing : Sharing preferences
+Sharing --> Student : Academic preview\nPDF or DOCX\nEmail draft
+Sharing --> Instructor : Student-approved\nacademic information
+
+legend bottom
+  External entities are shown as rectangles.
+  Folio processes are shown as rounded process shapes.
+  Logical data stores are shown as databases.
+  Each labeled arrow represents data moving between elements.
+endlegend
+
+@enduml

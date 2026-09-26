@@ -1,0 +1,120 @@
+@startuml folio-four-layer-sys-arch
+title Folio Four-Layer System Architecture
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultTextAlignment center
+
+actor Student
+actor Instructor
+
+node "Student Computer" {
+
+    component "Web Browser" as Browser
+
+    node "Local Folio Application\nPython / Streamlit" {
+
+        package "1. Presentation Layer" #D9EAF7 {
+            component "Coursework and\nCSV Import Screens" as CourseworkUI
+            component "Plan and\nFeedback Screens" as PlanUI
+            component "Schedule and\nProgress Screens" as ScheduleUI
+            component "Sharing and\nExport Screens" as SharingUI
+            component "Game and\nReward Screens" as GameUI
+        }
+
+        package "2. Application-Service Layer" #DFF2DF {
+            component "Coursework Service" as CourseworkService
+            component "Planning and\nFeedback Service" as PlanningService
+            component "Scheduling and\nCompletion Service" as SchedulingService
+            component "Sharing and\nExport Service" as SharingService
+            component "Game and\nReward Service" as GameService
+        }
+
+        package "3. Domain-Logic Layer" #FFF1CC {
+            component "Coursework\nValidation" as Validation
+            component "CSV Validation and\nDeduplication" as CSVValidation
+            component "Conflict-Detection\nAlgorithm" as ConflictDetection
+            component "Progress and\nReward Rules" as ProgressRewards
+            component "Academic-Data\nFiltering" as DataFiltering
+            component "Tic-Tac-Toe Minimax\nwith Alpha-Beta Pruning" as Minimax
+        }
+
+        package "4. Persistence and Integration Layer" #F5DADA {
+            component "Repository Layer" as Repositories
+            database "SQLite Database" as SQLite
+            component "CSV Parser\nPython csv" as CSVParser
+            component "PDF Generator\nfpdf2" as PDFGenerator
+            component "DOCX Generator\npython-docx" as DOCXGenerator
+            component "Email Preparation\nemail / smtplib" as EmailService
+        }
+    }
+
+    folder "Generated PDF and\nDOCX Files" as Files
+}
+
+cloud "External Email Service" as SMTP
+component "Instructor Email Client /\nDocument Viewer" as InstructorDevice
+
+Student --> Browser : interacts with
+Browser --> CourseworkUI : local Streamlit session
+Browser --> PlanUI
+Browser --> ScheduleUI
+Browser --> SharingUI
+Browser --> GameUI
+
+CourseworkUI --> CourseworkService
+PlanUI --> PlanningService
+ScheduleUI --> SchedulingService
+SharingUI --> SharingService
+GameUI --> GameService
+
+CourseworkService --> Validation
+CourseworkService --> CSVValidation
+PlanningService --> Validation
+SchedulingService --> ConflictDetection
+SchedulingService --> ProgressRewards
+SharingService --> DataFiltering
+GameService --> ProgressRewards
+GameService --> Minimax
+
+CourseworkService --> Repositories
+PlanningService --> Repositories
+SchedulingService --> Repositories
+GameService --> Repositories
+
+CSVValidation --> CSVParser
+SharingService --> PDFGenerator
+SharingService --> DOCXGenerator
+SharingService --> EmailService
+
+Repositories --> SQLite
+
+PDFGenerator --> Files
+DOCXGenerator --> Files
+EmailService --> Browser : message preview
+EmailService --> SMTP : student-approved email
+SMTP --> InstructorDevice
+Files --> InstructorDevice : student chooses to share
+InstructorDevice --> Instructor
+
+note right of Browser
+Streamlit uses a browser interface
+while Folio and its database run
+locally on the student's computer.
+end note
+
+note right of DataFiltering
+Removes progress, reward,
+and game information before
+academic information is shared.
+end note
+
+note bottom of SQLite
+Persists coursework, plans,
+tasks, reminders, feedback,
+rewards, and game state.
+end note
+
+@enduml

@@ -1,0 +1,109 @@
+@startuml func-struct-decomp
+title Folio Functional Structural Decomposition
+
+skinparam backgroundColor white
+skinparam shadowing false
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 20
+skinparam ranksep 30
+
+skinparam rectangle {
+    BackgroundColor #F7F7F7
+    BorderColor #333333
+    RoundCorner 8
+}
+
+rectangle "Folio" as Folio #D5E8F5
+
+rectangle "Manage\nCoursework" as Coursework #E8F1F8
+rectangle "Manage Plans\nand Feedback" as Planning #E8F1F8
+rectangle "Manage Schedule\nand Completion" as Scheduling #E8F1F8
+rectangle "Prepare Sharing\nand Exports" as Sharing #E8F1F8
+rectangle "Manage Game\nand Rewards" as GameRewards #E8F1F8
+rectangle "Persist Application\nState" as Persistence #E8F1F8
+
+Folio --> Coursework
+Folio --> Planning
+Folio --> Scheduling
+Folio --> Sharing
+Folio --> GameRewards
+Folio --> Persistence
+
+rectangle "Manual Entry" as ManualEntry
+rectangle "Edit and Delete\nCoursework" as EditCoursework
+rectangle "CSV Parsing" as CSVParsing
+rectangle "Validation and\nDeduplication" as Validation
+
+Coursework --> ManualEntry
+Coursework --> EditCoursework
+Coursework --> CSVParsing
+Coursework --> Validation
+
+rectangle "Select Coursework\nand Template" as SelectPlanning
+rectangle "Create and\nRevise Plan" as CreatePlan
+rectangle "Edit Suggested\nTasks" as EditTasks
+rectangle "Process Instructor\nSuggestions" as Feedback
+
+Planning --> SelectPlanning
+Planning --> CreatePlan
+Planning --> EditTasks
+Planning --> Feedback
+
+rectangle "Build Combined\nSchedule" as CombinedSchedule
+rectangle "Detect Scheduling\nConflicts" as Conflicts
+rectangle "Reschedule Tasks" as Reschedule
+rectangle "Manage Reminders" as Reminders
+rectangle "Process Task\nCompletion" as Completion
+rectangle "Calculate Plan\nProgress" as Progress
+
+Scheduling --> CombinedSchedule
+Scheduling --> Conflicts
+Scheduling --> Reschedule
+Scheduling --> Reminders
+Scheduling --> Completion
+Scheduling --> Progress
+
+rectangle "Select Academic\nInformation" as SelectShareData
+rectangle "Filter Nonacademic\nInformation" as FilterData
+rectangle "Generate PDF" as PDF
+rectangle "Generate DOCX" as DOCX
+rectangle "Prepare and Review\nInstructor Email" as Email
+
+Sharing --> SelectShareData
+Sharing --> FilterData
+Sharing --> PDF
+Sharing --> DOCX
+Sharing --> Email
+
+rectangle "Evaluate Reward\nEligibility" as RewardEligibility
+rectangle "Calculate Hybrid\nReward" as RewardCalculation
+rectangle "Maintain Game\nState" as GameState
+rectangle "Validate Player\nMove" as PlayerMove
+rectangle "Select Computer Move\nwith Minimax" as ComputerMove
+
+GameRewards --> RewardEligibility
+GameRewards --> RewardCalculation
+GameRewards --> GameState
+GameRewards --> PlayerMove
+GameRewards --> ComputerMove
+
+rectangle "Store Coursework" as StoreCoursework
+rectangle "Store Plans,\nTasks, and Feedback" as StorePlans
+rectangle "Store Reminders\nand Preferences" as StorePreferences
+rectangle "Store Game and\nReward State" as StoreGame
+rectangle "Restore Saved\nApplication State" as RestoreState
+
+Persistence --> StoreCoursework
+Persistence --> StorePlans
+Persistence --> StorePreferences
+Persistence --> StoreGame
+Persistence --> RestoreState
+
+legend bottom
+  Connections show functional decomposition and
+  do not represent data flow or execution order.
+endlegend
+
+@enduml
