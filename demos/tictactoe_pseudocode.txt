@@ -1,0 +1,199 @@
+TIC-TAC-TOE ALGORITHM PSEUDOCODE
+(Minimax with alpha-beta pruning; based on demos/src/tictactoe.py)
+
+CONSTANTS
+    PLAYER   = "X"   (human)
+    COMPUTER = "O"
+    EMPTY    = " "
+    TIE      = "tie"
+    WINNING_LINES = rows (0,1,2) (3,4,5) (6,7,8)
+                    columns (0,3,6) (1,4,7) (2,5,8)
+                    diagonals (0,4,8) (2,4,6)
+
+    Board is a list of 9 cells, indexed 0-8, left-to-right, top-to-bottom.
+
+
+HOW THE COMPUTER PICKS ITS MOVE (OVERVIEW)
+    1. For every empty square, the computer imagines playing there.
+    2. It then simulates the rest of the game: the player replies with
+       their best move, the computer replies to that, and so on, until
+       someone wins or the board is full. Both sides are assumed to play
+       perfectly (computer tries to MAXIMIZE the score, player tries to
+       MINIMIZE it).
+    3. Each finished game is scored:
+           computer wins -> +10 minus the number of moves it took
+           player wins   -> -10 plus the number of moves it took
+           tie           -> 0
+       Subtracting depth means the computer prefers the quickest win and,
+       if it is losing, the slowest loss.
+    4. Scores are passed back up the tree: on the computer's turn the
+       highest child score is kept, on the player's turn the lowest.
+       The score of a square is therefore the best result the computer
+       can guarantee if it plays there.
+    5. Alpha-beta pruning skips branches that cannot change the final
+       answer, so the same result is found with far fewer simulations.
+    6. The square with the highest score is the computer's move.
+
+    Example (computer is O, to move, O can win at square 2):
+        O at 2 -> immediate win, depth 1 -> score 10 - 1 =  9
+        O at 5 -> player can block/win later -> score 0 or negative
+        Square 2 has the highest score, so it is chosen.
+
+
+FUNCTION board_result(board)
+    FOR EACH (a, b, c) IN WINNING_LINES
+        IF board[a] is not EMPTY AND board[a] == board[b] == board[c]
+            RETURN board[a]                  // winning mark
+    IF no EMPTY cell remains on board
+        RETURN TIE
+    RETURN none                              // game still in progress
+
+
+FUNCTION minimax(board, maximizing, alpha, beta, depth)
+    // Returns the score of this board assuming both sides play perfectly.
+    //   maximizing = true  -> it is the computer's turn (wants high score)
+    //   maximizing = false -> it is the player's turn   (wants low score)
+    //   alpha = best score the computer is already guaranteed elsewhere
+    //           in the search (starts at -infinity)
+    //   beta  = best score the player is already guaranteed elsewhere
+    //           in the search (starts at +infinity)
+    //   depth = number of moves played since the search began (starts at 0)
+
+    // STEP 1: BASE CASE - stop recursing if the game is over
+    result = board_result(board)
+    IF result == COMPUTER  RETURN 10 - depth    // faster wins score higher
+    IF result == PLAYER    RETURN depth - 10    // slower losses score higher
+    IF result == TIE       RETURN 0
+
+    // STEP 2: RECURSIVE CASE - game is not over, try every legal move
+    legal_moves = all indexes where board[index] is EMPTY
+
+    IF maximizing                               // computer's turn
+        best = -infinity                        // any real score beats this
+        FOR EACH move IN legal_moves
+            board[move] = COMPUTER              // try the move
+            // ask: what will the player do in reply? (turn flips)
+            score = minimax(board, false, alpha, beta, depth + 1)
+            board[move] = EMPTY                 // undo move (backtrack)
+            best  = max(best, score)            // keep the highest score seen
+            alpha = max(alpha, best)            // computer's guaranteed floor
+            IF beta <= alpha
+                // The player already has a better option earlier in the
+                // search, so they would never let the game reach this
+                // branch. The remaining moves cannot change the answer.
+                BREAK                           // prune remaining moves
+        RETURN best
+    ELSE                                        // player's turn
+        best = +infinity                        // any real score beats this
+        FOR EACH move IN legal_moves
+            board[move] = PLAYER                // try the move
+            // ask: what will the computer do in reply? (turn flips)
+            score = minimax(board, true, alpha, beta, depth + 1)
+            board[move] = EMPTY                 // undo move (backtrack)
+            best = min(best, score)             // keep the lowest score seen
+            beta = min(beta, best)              // player's guaranteed ceiling
+            IF beta <= alpha
+                // The computer already has a better option earlier in the
+                // search, so it would never steer the game into this
+                // branch. Skip the remaining moves.
+                BREAK                           // prune remaining moves
+        RETURN best
+
+
+FUNCTION choose_best_move(board)
+    // Top level of the search. Scores each possible computer move and
+    // returns the one with the highest minimax score.
+    best_score = -infinity
+    best_move  = none
+
+    FOR EACH index IN 0..8
+        IF board[index] is not EMPTY
+            CONTINUE                            // square is taken
+
+        board[index] = COMPUTER                 // try this move
+        // Score the resulting board. It is now the player's turn, so
+        // maximizing = false. minimax plays out every possible
+        // continuation and returns the outcome under perfect play.
+        score = minimax(board, false)
+        board[index] = EMPTY                    // undo move
+
+        IF score > best_score                   // strictly greater, so on a
+            best_score = score                  // tie the lowest-numbered
+            best_move  = index                  // square is kept
+
+    RETURN best_move                            // none if board is full
+
+
+GAME STATE (TicTacToeGame)
+    board          = 9 EMPTY cells
+    current_player = PLAYER or COMPUTER
+    winner         = none
+    game_over      = false
+
+PROCEDURE new_game(starting_player)
+    IF starting_player is given AND not PLAYER or COMPUTER
+        RAISE error "Starting player must be X or O."
+    board          = 9 EMPTY cells
+    current_player = starting_player, or random choice of PLAYER / COMPUTER
+    winner         = none
+    game_over      = false
+
+FUNCTION get_legal_moves()
+    IF game_over  RETURN empty list
+    RETURN all indexes where board[index] is EMPTY
+
+FUNCTION is_legal_move(position)
+    RETURN position is an integer
+       AND 0 <= position < 9
+       AND board[position] is EMPTY
+       AND game_over is false
+
+FUNCTION make_move(position)
+    IF NOT is_legal_move(position)
+        RETURN false
+    board[position] = current_player
+    check_winner()
+    IF game_over is false
+        switch_player()
+    RETURN true
+
+PROCEDURE switch_player()
+    IF current_player == PLAYER
+        current_player = COMPUTER
+    ELSE
+        current_player = PLAYER
+
+FUNCTION check_winner()
+    result = board_result(board)
+    IF result is PLAYER or COMPUTER
+        winner = result
+        game_over = true
+    ELSE IF result == TIE
+        winner = none
+        game_over = true
+    RETURN result
+
+FUNCTION computer_move()
+    IF current_player is not COMPUTER OR game_over
+        RETURN none
+    move = choose_best_move(board)
+    IF move is none
+        check_winner()
+        RETURN none
+    make_move(move)
+    RETURN move
+
+
+MAIN GAME LOOP
+    new_game()
+    WHILE game_over is false
+        IF current_player == PLAYER
+            position = read human selection
+            IF NOT make_move(position)
+                prompt again                    // illegal move, same turn
+        ELSE
+            computer_move()
+    IF winner is not none
+        announce winner
+    ELSE
+        announce tie
