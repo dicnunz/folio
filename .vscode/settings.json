@@ -1,0 +1,3 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/testing/folio-tool-evaluation/.venv/bin/python"
+}

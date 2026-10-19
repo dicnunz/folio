@@ -1,0 +1,90 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.11, pytest-9.1.1, pluggy-1.6.0 -- /opt/homebrew/opt/python@3.11/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /Users/caleb/Desktop/School/Senior Design/folio/demos
+plugins: anyio-4.12.1, dash-4.1.0
+collecting ... collected 76 items
+
+tests/test_coursework_service.py::test_c1_create_edit_reopen_delete PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes0-fields0] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes1-fields1] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes2-fields2] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes3-fields3] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes4-fields4] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes5-fields5] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes6-fields6] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes7-fields7] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes8-fields8] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes9-fields9] PASSED
+tests/test_coursework_service.py::test_c2_all_errors_and_failed_edit_preserves_original[changes10-fields10] PASSED
+tests/test_coursework_service.py::test_c3_valid_csv_quoted_comma_optional_score_and_sources PASSED
+tests/test_coursework_service.py::test_c4_mixed_rows_all_errors_and_counts PASSED
+tests/test_coursework_service.py::test_c5_file_failure_preserves_data[] PASSED
+tests/test_coursework_service.py::test_c5_file_failure_preserves_data[course\nCalculus\n] PASSED
+tests/test_coursework_service.py::test_c5_file_failure_preserves_data[course,item_name,due_date\nCalculus,Valid,2026-10-20\n"unclosed] PASSED
+tests/test_coursework_service.py::test_c5_file_failure_preserves_data[course,item_name,due_date,course\n] PASSED
+tests/test_coursework_service.py::test_c5_file_failure_preserves_data[course,item_name,due_date,unknown\n] PASSED
+tests/test_coursework_service.py::test_unreadable_and_bad_encoding PASSED
+tests/test_coursework_service.py::test_header_only_and_all_invalid PASSED
+tests/test_coursework_service.py::test_c5_multiple_duplicate_groups_existing_records_and_score PASSED
+tests/test_coursework_service.py::test_parser_locations_bom_binary_and_caller_stream PASSED
+tests/test_coursework_service.py::test_extra_values_are_row_errors PASSED
+tests/test_coursework_service.py::test_deletion_requires_relationship_check[None-relationships_unknown] PASSED
+tests/test_coursework_service.py::test_deletion_requires_relationship_check[dependencies1-dependent_records] PASSED
+tests/test_coursework_service.py::test_deletion_requires_relationship_check[dependencies2-dependent_records] PASSED
+tests/test_coursework_service.py::test_not_found_and_immutable_identifiers PASSED
+tests/test_coursework_service.py::test_sqlite_foreign_keys_preserve_dependents_even_if_checker_wrong PASSED
+tests/test_coursework_service.py::test_repository_write_failures_roll_back[INSERT] PASSED
+tests/test_coursework_service.py::test_repository_write_failures_roll_back[UPDATE] PASSED
+tests/test_coursework_service.py::test_repository_write_failures_roll_back[DELETE] PASSED
+tests/test_coursework_service.py::test_import_rolls_back_valid_prefix_on_storage_failure PASSED
+tests/test_coursework_service.py::test_legacy_nonnullable_score_is_not_silently_migrated PASSED
+tests/test_coursework_service.py::test_p7_service_import_500_three_runs 
+P7 service benchmark: macOS-26.6.2-arm64-arm-64bit, Python 3.11.11, SQLite 3.53.4
+run 1: 0.004369s, accepted=500, rejected=0, database=65536 bytes
+run 2: 0.004040s, accepted=500, rejected=0, database=65536 bytes
+run 3: 0.003752s, accepted=500, rejected=0, database=65536 bytes
+PASSED
+tests/test_coursework_service.py::test_commit_failure_rolls_back_import PASSED
+tests/test_csv_storage.py::test_valid_row_is_normalized_and_accepted PASSED
+tests/test_csv_storage.py::test_missing_required_fields_are_rejected PASSED
+tests/test_csv_storage.py::test_malformed_values_are_rejected PASSED
+tests/test_csv_storage.py::test_csv_missing_a_required_column_is_rejected PASSED
+tests/test_csv_storage.py::test_valid_row_is_inserted_into_sqlite PASSED
+tests/test_csv_storage.py::test_duplicate_csv_record_is_not_inserted_twice PASSED
+tests/test_csv_storage.py::test_mixed_import_reports_each_row_type PASSED
+tests/test_csv_storage.py::test_import_preserves_normalized_data_and_source PASSED
+tests/test_rewards.py::test_one_task_earns_one_game_move PASSED
+tests/test_rewards.py::test_task_awards_weighted_xp_and_points PASSED
+tests/test_rewards.py::test_duplicate_task_completion_does_not_award_twice PASSED
+tests/test_rewards.py::test_two_different_tasks_earn_separate_rewards PASSED
+tests/test_rewards.py::test_consuming_move_changes_only_move_count PASSED
+tests/test_rewards.py::test_cannot_consume_move_when_none_are_available PASSED
+tests/test_rewards.py::test_lost_turn_does_not_change_rewards PASSED
+tests/test_rewards.py::test_invalid_task_weight_is_rejected_without_processing_task PASSED
+tests/test_scheduling.py::test_valid_task_addition_and_lookup_by_id PASSED
+tests/test_scheduling.py::test_duplicate_task_id_is_rejected_without_replacing_task PASSED
+tests/test_scheduling.py::test_duplicate_signature_is_rejected_even_with_a_different_id PASSED
+tests/test_scheduling.py::test_adjacent_nonoverlapping_tasks_have_no_conflicts PASSED
+tests/test_scheduling.py::test_overlapping_cross_plan_tasks_report_conflict PASSED
+tests/test_scheduling.py::test_conflicting_addition_preserves_both_student_choices PASSED
+tests/test_scheduling.py::test_get_tasks_for_plan_filters_tasks PASSED
+tests/test_scheduling.py::test_removal_updates_lookup_and_duplicate_signature_tracking PASSED
+tests/test_scheduling.py::test_valid_reschedule_updates_time_and_signature PASSED
+tests/test_scheduling.py::test_conflicting_reschedule_returns_conflict_and_keeps_original_time PASSED
+tests/test_scheduling.py::test_invalid_or_missing_reschedule_is_rejected PASSED
+tests/test_tictactoe.py::test_new_board_is_empty_and_starting_player_is_valid PASSED
+tests/test_tictactoe.py::test_legal_move_is_accepted_and_turn_changes PASSED
+tests/test_tictactoe.py::test_occupied_square_is_rejected_without_changing_it PASSED
+tests/test_tictactoe.py::test_out_of_range_and_noninteger_moves_are_rejected PASSED
+tests/test_tictactoe.py::test_horizontal_win_is_detected PASSED
+tests/test_tictactoe.py::test_vertical_win_is_detected PASSED
+tests/test_tictactoe.py::test_diagonal_win_is_detected PASSED
+tests/test_tictactoe.py::test_tie_is_detected PASSED
+tests/test_tictactoe.py::test_new_game_clears_board_and_old_result PASSED
+tests/test_tictactoe.py::test_minimax_returns_a_legal_move_without_mutating_board PASSED
+tests/test_tictactoe.py::test_minimax_takes_immediate_winning_move PASSED
+tests/test_tictactoe.py::test_minimax_blocks_immediate_player_win PASSED
+tests/test_tictactoe.py::test_computer_never_overwrites_occupied_cells PASSED
+
+============================== 76 passed in 0.13s ==============================

@@ -1,16 +1,20 @@
 """CSV validation and SQLite persistence for the Folio prototype."""
 
-import csv
 import sqlite3
-from datetime import date
+from contextlib import closing, contextmanager
+
+from .coursework import (REQUIRED_COLUMNS as COURSEWORK_REQUIRED_COLUMNS, normalize_row, parse_csv,
+                         validate_coursework, validate_and_deduplicate)
+from .coursework_service import CourseworkService, RepositoryError
 
 
-REQUIRED_COLUMNS = ("course", "item_name", "due_date", "score")
+# Legacy CSV writer field list; score is now optional during validation.
+REQUIRED_COLUMNS = COURSEWORK_REQUIRED_COLUMNS + ("score",)
 
 
 def initialize_database(database_path):
     """Create the Folio records table when it does not already exist."""
-    with sqlite3.connect(database_path) as connection:
+    with closing(sqlite3.connect(database_path)) as connection, connection:
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS records (
@@ -18,7 +22,7 @@ def initialize_database(database_path):
                 course TEXT NOT NULL,
                 item_name TEXT NOT NULL,
                 due_date TEXT NOT NULL,
-                score REAL NOT NULL,
+                score REAL,
                 source TEXT NOT NULL,
                 UNIQUE(course, item_name, due_date, score)
             )
@@ -27,67 +31,16 @@ def initialize_database(database_path):
 
 
 def read_csv(csv_path):
-    """Read a CSV file and verify that all required columns are present."""
-    with open(csv_path, newline="", encoding="utf-8-sig") as csv_file:
-        reader = csv.DictReader(csv_file)
-        fieldnames = set(reader.fieldnames or [])
-        missing_columns = set(REQUIRED_COLUMNS) - fieldnames
-        if missing_columns:
-            missing = ", ".join(sorted(missing_columns))
-            raise ValueError(f"CSV is missing required columns: {missing}")
-        return list(reader)
-
-
-def normalize_row(row):
-    """Trim text and normalize valid dates and numeric scores."""
-    normalized = {
-        key: value.strip() if isinstance(value, str) else value
-        for key, value in row.items()
-    }
-
-    due_date = normalized.get("due_date")
-    if due_date:
-        try:
-            normalized["due_date"] = date.fromisoformat(due_date).isoformat()
-        except (TypeError, ValueError):
-            pass
-
-    score = normalized.get("score")
-    if score not in (None, ""):
-        try:
-            normalized["score"] = float(score)
-        except (TypeError, ValueError):
-            pass
-
-    return normalized
+    """Compatibility reader; file errors continue to raise ValueError."""
+    result = parse_csv(csv_path)
+    if result["file_errors"]:
+        raise ValueError("; ".join(result["file_errors"]))
+    return [row["record"] for row in result["rows"]]
 
 
 def validate_row(row):
-    """Return validation errors for a normalized CSV row."""
-    errors = []
-
-    if None in row:
-        errors.append("Row contains more values than the CSV header.")
-
-    for field in REQUIRED_COLUMNS:
-        if row.get(field) in (None, ""):
-            errors.append(f"{field} is required.")
-
-    due_date = row.get("due_date")
-    if due_date not in (None, ""):
-        try:
-            date.fromisoformat(due_date)
-        except (TypeError, ValueError):
-            errors.append("due_date must use YYYY-MM-DD format.")
-
-    score = row.get("score")
-    if score not in (None, ""):
-        try:
-            float(score)
-        except (TypeError, ValueError):
-            errors.append("score must be numeric.")
-
-    return errors
+    """Compatibility wrapper returning messages from the shared validator."""
+    return [error["message"] for error in validate_coursework(row)["errors"]]
 
 
 def is_duplicate(connection, row):
@@ -96,10 +49,10 @@ def is_duplicate(connection, row):
         """
         SELECT 1
         FROM records
-        WHERE course = ? AND item_name = ? AND due_date = ? AND score = ?
+        WHERE course = ? AND item_name = ? AND due_date = ?
         LIMIT 1
         """,
-        (row["course"], row["item_name"], row["due_date"], row["score"]),
+        (row["course"], row["item_name"], row["due_date"]),
     ).fetchone()
     return match is not None
 
@@ -123,43 +76,14 @@ def insert_row(connection, row, source="csv"):
 
 
 def import_csv(csv_path, database_path):
-    """Import valid, nonduplicate CSV rows and return an import summary."""
-    initialize_database(database_path)
-    rows = read_csv(csv_path)
-    summary = {
-        "total_rows": len(rows),
-        "inserted_rows": 0,
-        "invalid_rows": 0,
-        "duplicate_rows": 0,
-        "errors": [],
-    }
-
-    with sqlite3.connect(database_path) as connection:
-        for row_number, row in enumerate(rows, start=2):
-            normalized = normalize_row(row)
-            errors = validate_row(normalized)
-
-            if errors:
-                summary["invalid_rows"] += 1
-                summary["errors"].append(
-                    {"row_number": row_number, "errors": errors}
-                )
-                continue
-
-            if is_duplicate(connection, normalized):
-                summary["duplicate_rows"] += 1
-                continue
-
-            insert_row(connection, normalized)
-            summary["inserted_rows"] += 1
-
-    return summary
+    """Import through the shared service, retaining legacy summary keys."""
+    return CourseworkService(SQLiteCourseworkRepository(database_path)).import_coursework_csv(csv_path)
 
 
 def get_all_records(database_path):
     """Return all stored records as dictionaries in insertion order."""
     initialize_database(database_path)
-    with sqlite3.connect(database_path) as connection:
+    with closing(sqlite3.connect(database_path)) as connection, connection:
         connection.row_factory = sqlite3.Row
         rows = connection.execute(
             """
@@ -169,3 +93,73 @@ def get_all_records(database_path):
             """
         ).fetchall()
     return [dict(row) for row in rows]
+
+
+class SQLiteCourseworkRepository:
+    """Adapter for the existing prototype, not the unfinished CSE-22 repository.
+
+    dependency_checker(connection, id) must return references or an empty list.
+    Without it, deletion fails closed.
+    """
+
+    def __init__(self, database_path, dependency_checker=None):
+        self.database_path = database_path
+        self.dependency_checker = dependency_checker
+
+    @contextmanager
+    def transaction(self):
+        connection = None
+        
+        try:
+            initialize_database(self.database_path)
+            connection = sqlite3.connect(self.database_path)
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys = ON")
+            connection.execute("BEGIN IMMEDIATE")
+            yield _SQLiteTransaction(connection, self.dependency_checker)
+            connection.commit()
+            
+        except sqlite3.Error as error:
+            if connection is not None:
+                connection.rollback()
+            raise RepositoryError(f"Coursework storage failed: {error}") from error
+        
+        except Exception:
+            if connection is not None:
+                connection.rollback()
+            raise
+        
+        finally:
+            if connection is not None:
+                connection.close()
+
+
+class _SQLiteTransaction: # pylint: disable=too-few-public-methods
+    """Transaction context for SQLiteCourseworkRepository."""
+    def __init__(self, connection, dependency_checker):
+        self.connection = connection
+        self.dependency_checker = dependency_checker
+
+    def list_records(self):
+        return [dict(row) for row in self.connection.execute("SELECT * FROM records ORDER BY id")]
+
+    def get(self, record_id):
+        row = self.connection.execute("SELECT * FROM records WHERE id = ?", (record_id,)).fetchone()
+        return dict(row) if row is not None else None
+
+    def insert(self, record, source):
+        return self.get(insert_row(self.connection, record, source))
+
+    def update(self, record_id, record):
+        self.connection.execute(
+            "UPDATE records SET course=?, item_name=?, due_date=?, score=? WHERE id=?",
+            (record["course"], record["item_name"], record["due_date"], record["score"], record_id))
+        return self.get(record_id)
+
+    def dependencies(self, record_id):
+        if self.dependency_checker is None:
+            return None
+        return self.dependency_checker(self.connection, record_id)
+
+    def delete(self, record_id):
+        self.connection.execute("DELETE FROM records WHERE id=?", (record_id,))
