@@ -60,3 +60,21 @@ def test_storage_startup_failure_is_visible(tmp_path, monkeypatch):
     app = AppTest.from_file(str(APP), default_timeout=15).run()
     assert not app.exception and app.error
     assert 'storage' in app.error[0].value
+
+
+def test_manual_times_saved_and_restored(tmp_path, monkeypatch):
+    monkeypatch.setenv('FOLIO_DATABASE', str(tmp_path / 'times.sqlite3'))
+    app = AppTest.from_file(str(APP), default_timeout=15).run()
+    for label, value in [('Course','CSE491'), ('Assignment name','Exam'),
+                         ('Due date (YYYY-MM-DD)','2026-10-26'),
+                         ('Start time (optional, YYYY-MM-DDTHH:MM)','2026-10-26T09:00'),
+                         ('End time (optional, YYYY-MM-DDTHH:MM)','2026-10-26T10:00')]:
+        field(app, label).set_value(value)
+    click(app, 'Save coursework')
+    assert not app.exception and app.success
+    field(app, 'Edit end time (YYYY-MM-DDTHH:MM)').set_value('2026-10-26T08:00')
+    click(app, 'Save changes')
+    assert app.error
+    restart = AppTest.from_file(str(APP), default_timeout=15).run()
+    assert field(restart, 'Edit start time (YYYY-MM-DDTHH:MM)').value == '2026-10-26T09:00'
+    assert field(restart, 'Edit end time (YYYY-MM-DDTHH:MM)').value == '2026-10-26T10:00'

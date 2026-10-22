@@ -17,13 +17,15 @@ def render_coursework(repository, service):
         name = st.text_input("Assignment name")
         due = st.text_input("Due date (YYYY-MM-DD)")
         score = st.text_input("Score (optional)")
+        start = st.text_input("Start time (optional, YYYY-MM-DDTHH:MM)")
+        end = st.text_input("End time (optional, YYYY-MM-DDTHH:MM)")
         save = st.form_submit_button("Save coursework")
     if save:
         show_result(service.create_coursework({"course": course, "item_name": name,
-                    "due_date": due, "score": score}), "Coursework saved.")
+                    "due_date": due, "score": score, "start_time": start, "end_time": end}), "Coursework saved.")
 
     st.subheader("Import CSV")
-    st.caption("Required columns: course, item_name, due_date (YYYY-MM-DD). Optional: score (numeric). UTF-8 CSV; duplicates use the three required fields.")
+    st.caption("Required columns: course, item_name, due_date (YYYY-MM-DD). Optional: score (numeric), start_time and end_time (YYYY-MM-DDTHH:MM, 24-hour local time). Supply both times or leave both blank; end must be later than start. UTF-8 CSV; duplicates use the three required fields.")
     upload = st.file_uploader("Coursework CSV", type=["csv"])
     if st.button("Import coursework", disabled=upload is None):
         upload.seek(0)
@@ -47,10 +49,12 @@ def render_coursework(repository, service):
             name = st.text_input("Edit assignment name", row["item_name"])
             due = st.text_input("Edit due date (YYYY-MM-DD)", row["due_date"])
             score = st.text_input("Edit score (optional)", "" if row["score"] is None else str(row["score"]))
+            start = st.text_input("Edit start time (YYYY-MM-DDTHH:MM)", row.get("start_time") or "")
+            end = st.text_input("Edit end time (YYYY-MM-DDTHH:MM)", row.get("end_time") or "")
             edit = st.form_submit_button("Save changes")
         if edit:
             show_result(service.edit_coursework(record_id, {"course": course, "item_name": name,
-                        "due_date": due, "score": score}), "Coursework changes saved.")
+                        "due_date": due, "score": score, "start_time": start, "end_time": end}), "Coursework changes saved.")
         if st.button("Delete selected coursework"):
             show_result(service.delete_coursework(record_id), "Coursework deleted.")
     records = repository.restore_saved_application_state()["coursework"]

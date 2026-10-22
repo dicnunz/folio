@@ -15,6 +15,7 @@ REQUIRED_COLUMNS = COURSEWORK_REQUIRED_COLUMNS + ("score",)
 def initialize_database(database_path):
     """Create the Folio records table when it does not already exist."""
     with closing(sqlite3.connect(database_path)) as connection, connection:
+        connection.execute("BEGIN IMMEDIATE")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS records (
@@ -28,6 +29,10 @@ def initialize_database(database_path):
             )
             """
         )
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(records)")}
+        for field in ("start_time", "end_time"):
+            if field not in columns:
+                connection.execute(f"ALTER TABLE records ADD COLUMN {field} TEXT")
 
 
 def read_csv(csv_path):
@@ -61,8 +66,8 @@ def insert_row(connection, row, source="csv"):
     """Insert one validated row and return its database ID."""
     cursor = connection.execute(
         """
-        INSERT INTO records (course, item_name, due_date, score, source)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO records (course, item_name, due_date, score, source, start_time, end_time)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             row["course"],
@@ -70,6 +75,8 @@ def insert_row(connection, row, source="csv"):
             row["due_date"],
             row["score"],
             source,
+            row.get("start_time"),
+            row.get("end_time"),
         ),
     )
     return cursor.lastrowid
@@ -87,7 +94,7 @@ def get_all_records(database_path):
         connection.row_factory = sqlite3.Row
         rows = connection.execute(
             """
-            SELECT id, course, item_name, due_date, score, source
+            SELECT id, course, item_name, due_date, score, source, start_time, end_time
             FROM records
             ORDER BY id
             """
@@ -152,8 +159,8 @@ class _SQLiteTransaction: # pylint: disable=too-few-public-methods
 
     def update(self, record_id, record):
         self.connection.execute(
-            "UPDATE records SET course=?, item_name=?, due_date=?, score=? WHERE id=?",
-            (record["course"], record["item_name"], record["due_date"], record["score"], record_id))
+            "UPDATE records SET course=?, item_name=?, due_date=?, score=?, start_time=?, end_time=? WHERE id=?",
+            (record["course"], record["item_name"], record["due_date"], record["score"], record.get("start_time"), record.get("end_time"), record_id))
         return self.get(record_id)
 
     def dependencies(self, record_id):

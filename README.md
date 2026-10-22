@@ -35,6 +35,21 @@ Run the application tests from the repository root with `.venv/bin/python -m pyt
 
 See [CSE-22 implementation, test evidence, and remaining integration](evidence/cse-22/README.md) for interfaces, screenshots, measured timings, rollback coverage, and the M2 contribution handoff.
 
+## Coursework CSV format
+
+Required headers: `course,item_name,due_date`. Optional headers: `score,start_time,end_time`.
+Dates use `YYYY-MM-DD`. Start/end times use `YYYY-MM-DDTHH:MM` (24-hour local time, no timezone suffix or seconds). Supply both times or leave both blank; the end must be later than the start. Dates in the time fields allow overnight intervals. The interval is independent of the due date.
+
+```csv
+course,item_name,due_date,score,start_time,end_time
+CS 491,Design Review,2026-10-26,,2026-10-26T09:00,2026-10-26T10:30
+MATH 240,Homework 5,2026-10-28,92,,
+```
+
+Use [examples/coursework-with-times.csv](examples/coursework-with-times.csv) to try an import. Manual creation and editing expose the same optional fields. Existing CSVs without times remain valid. Duplicate detection still uses course, assignment name, and due date; changing only a time does not make a new record. These fields retain coursework timing context and do not automatically create or reschedule plan tasks.
+
+Version 1 application databases automatically upgrade to version 2 on startup to add these fields. The upgrade is transactional and preserves records, IDs, and plan/task relationships. The demo CSV adapter also adds nullable time columns so it retains imported intervals.
+
 ## Planned functionality
 
 - Manual and CSV entry of course schedules, assessments, deadlines, and scores.

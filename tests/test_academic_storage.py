@@ -37,7 +37,7 @@ def test_fresh_database_restart_and_version(application):
     repository.initialize()
     assert repository.RestoreSavedApplicationState() == empty
     with sqlite3.connect(repository.database_path) as connection:
-        assert connection.execute('PRAGMA user_version').fetchone()[0] == 1
+        assert connection.execute('PRAGMA user_version').fetchone()[0] == 2
         assert connection.execute('PRAGMA foreign_key_check').fetchall() == []
 
 

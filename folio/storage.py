@@ -10,7 +10,7 @@ import sqlite3
 
 from demos.src.coursework_service import RepositoryError
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SCHEMA = (
     """CREATE TABLE coursework (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +63,13 @@ class AcademicRepository:
                     raise RepositoryError("Unversioned database: choose a new application database; legacy demo data has not been changed.")
                 for statement in SCHEMA:
                     connection.execute(statement)
+                version = 1
+            if version == 1:
+                # Additive, transactional migration preserves IDs and all relationships.
+                connection.execute("ALTER TABLE coursework ADD COLUMN start_time TEXT")
+                connection.execute("""ALTER TABLE coursework ADD COLUMN end_time TEXT
+                    CHECK ((start_time IS NULL AND end_time IS NULL) OR
+                           (start_time IS NOT NULL AND end_time IS NOT NULL AND start_time < end_time))""")
                 connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
             elif version != SCHEMA_VERSION:
                 raise RepositoryError(f"Unsupported database version {version}; expected {SCHEMA_VERSION}.")
@@ -211,14 +218,14 @@ class CourseworkTransaction:
 
     def insert(self, record, source):
         record_id = self.connection.execute(
-            "INSERT INTO coursework(course,item_name,due_date,score,source) VALUES (?,?,?,?,?)",
-            (record["course"], record["item_name"], record["due_date"], record.get("score"), source)).lastrowid
+            "INSERT INTO coursework(course,item_name,due_date,score,source,start_time,end_time) VALUES (?,?,?,?,?,?,?)",
+            (record["course"], record["item_name"], record["due_date"], record.get("score"), source, record.get("start_time"), record.get("end_time"))).lastrowid
         return self.get(record_id)
 
     def update(self, record_id, record):
         cursor = self.connection.execute(
-            "UPDATE coursework SET course=?,item_name=?,due_date=?,score=? WHERE id=?",
-            (record["course"], record["item_name"], record["due_date"], record.get("score"), record_id))
+            "UPDATE coursework SET course=?,item_name=?,due_date=?,score=?,start_time=?,end_time=? WHERE id=?",
+            (record["course"], record["item_name"], record["due_date"], record.get("score"), record.get("start_time"), record.get("end_time"), record_id))
         if cursor.rowcount != 1:
             raise RepositoryError("Coursework was not found.")
         return self.get(record_id)

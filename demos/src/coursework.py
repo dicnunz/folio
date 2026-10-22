@@ -4,11 +4,11 @@ import csv
 import io
 import math
 import re
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 REQUIRED_COLUMNS = ("course", "item_name", "due_date")
-OPTIONAL_COLUMNS = ("score",)
+OPTIONAL_COLUMNS = ("score", "start_time", "end_time")
 
 
 def normalize_row(row):
@@ -24,6 +24,9 @@ def normalize_row(row):
             normalized["score"] = float(score)
         except (TypeError, ValueError, OverflowError):
             pass
+    for field in ("start_time", "end_time"):
+        if normalized.get(field) in (None, ""):
+            normalized[field] = None
     return normalized
 
 
@@ -49,6 +52,22 @@ def validate_coursework(data):
             date.fromisoformat(value)
         except ValueError:
             error("due_date", "format", "due_date must use YYYY-MM-DD format.")
+    parsed_times = {}
+    for field in ("start_time", "end_time"):
+        value = row.get(field)
+        if value is not None:
+            try:
+                if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", value):
+                    raise ValueError
+                parsed_times[field] = datetime.strptime(value, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                error(field, "format", f"{field} must use YYYY-MM-DDTHH:MM format (24-hour local time).")
+    if row.get("start_time") is not None and row.get("end_time") is None:
+        error("end_time", "required", "end_time is required when start_time is supplied.")
+    if row.get("end_time") is not None and row.get("start_time") is None:
+        error("start_time", "required", "start_time is required when end_time is supplied.")
+    if len(parsed_times) == 2 and parsed_times["end_time"] <= parsed_times["start_time"]:
+        error("end_time", "order", "end_time must be later than start_time.")
     score = row.get("score")
     if score is not None and (isinstance(score, bool) or not isinstance(score, (int, float))):
         error("score", "type", "score must be numeric.")
