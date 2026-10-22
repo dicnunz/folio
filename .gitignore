@@ -1,0 +1,9 @@
+# Local runtime state; preserve already-tracked M1 evidence.
+.venv/
+__pycache__/
+.pytest_cache/
+data/
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm

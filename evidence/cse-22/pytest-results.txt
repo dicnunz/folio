@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.11, pytest-9.1.1, pluggy-1.7.0 -- /private/tmp/folio-cse22-venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/caleb/Desktop/School/Senior Design/folio
+collecting ... collected 18 items
+
+tests/test_academic_storage.py::test_fresh_database_restart_and_version PASSED
+tests/test_academic_storage.py::test_c6_latest_academic_state_across_process_restart PASSED
+tests/test_academic_storage.py::test_c7_identity_reschedule_delete_and_other_plan_preserved PASSED
+tests/test_academic_storage.py::test_store_coursework_contract_and_service_integration PASSED
+tests/test_academic_storage.py::test_real_relationship_checker_blocks_coursework_delete PASSED
+tests/test_academic_storage.py::test_child_cannot_be_moved_and_plan_cannot_be_reassigned PASSED
+tests/test_academic_storage.py::test_aggregate_failure_rolls_back_every_table[task] PASSED
+tests/test_academic_storage.py::test_aggregate_failure_rolls_back_every_table[feedback] PASSED
+tests/test_academic_storage.py::test_aggregate_failure_rolls_back_every_table[duplicate_id] PASSED
+tests/test_academic_storage.py::test_aggregate_failure_rolls_back_every_table[missing_coursework] PASSED
+tests/test_academic_storage.py::test_commit_failure_rolls_back_aggregate PASSED
+tests/test_academic_storage.py::test_csv_rollback_and_mixed_import PASSED
+tests/test_academic_storage.py::test_feedback_rejection_alone_does_not_revise_plan_or_tasks PASSED
+tests/test_academic_storage.py::test_legacy_or_newer_schema_is_not_changed PASSED
+tests/test_academic_storage.py::test_storage_timing_three_runs C13 repository run 1: read=0.000110s save_commit=0.000504s
+C13 repository run 2: read=0.000107s save_commit=0.000329s
+C13 repository run 3: read=0.000104s save_commit=0.000328s
+PASSED
+tests/test_application.py::test_coursework_controls_restore_and_edit 2026-10-21 20:20:45.776 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-10-21 20:20:46.076 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+PASSED
+tests/test_application.py::test_plan_fixture_display_and_dependent_delete 2026-10-21 20:20:46.090 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+PASSED
+tests/test_application.py::test_storage_startup_failure_is_visible 2026-10-21 20:20:46.111 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+PASSED
+
+============================== 18 passed in 0.55s ==============================

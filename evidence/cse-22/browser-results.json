@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-10-21T20:21:31.719809-04:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.11",
+  "sqlite": "3.53.4",
+  "database_bytes_start": 40960,
+  "timing": "perf_counter around Playwright click through visible result assertion",
+  "base_commit": "38fb8c098508472349f4d6c2fb69d100b72a9617",
+  "implementation": "local CSE-22 working tree; see source hashes",
+  "browser": "156.0.8078.4",
+  "source_sha256": {
+    "app.py": "9e688f35d79bd56d0be2dfc63d32a5f36c75e5e8dbb8245728b9b11208248e74",
+    "folio/__init__.py": "e23205a9482d697dafca3498d948568e5366f7acfae15053cc30a7be72e5e220",
+    "folio/application.py": "f31e174d628fdd4921b1307a2b6f73cfcd2798912d99228003ae444ec98ac206",
+    "folio/coursework_ui.py": "a053cba1b81fdb04ee20db43f55ed826973bc7e72377168c4ce3a7da71bda043",
+    "folio/storage.py": "d616349ed5ff68929dc8991d78c569c3538061248b7fe9dd45fcaecd40d60f35",
+    "scripts/verify_cse22_browser.py": "550fec7c4948b623efad5f05c7dec52177014468867211efb871ceff51afae6b"
+  },
+  "database_bytes_end": 40960,
+  "counts_after_restart": {
+    "coursework": 5,
+    "plans": 2,
+    "tasks": 3,
+    "feedback": 2
+  },
+  "timings_seconds": {
+    "coursework_save": [
+      0.07944441703148186,
+      0.07112866709940135,
+      0.06828033295460045
+    ],
+    "stored_plan_display": [
+      0.10298350010998547,
+      0.11774358409456909,
+      0.10472774994559586
+    ]
+  },
+  "status": "PASS"
+}

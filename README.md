@@ -6,11 +6,34 @@ Folio is a student academic planning app in development. It is intended to help 
 
 ## Current status
 
-This repository currently contains the project website and planning documents. The application features below are planned, not a completed product.
+The M2 local Streamlit application now persists coursework, plans, tasks, and entered feedback in SQLite. Coursework controls use the CSE-20 validation service. Plan/task editing and the full planning/export workflow remain under development; explicit fixtures exercise their storage interfaces. The original M1 demos remain unchanged.
 
 - [Project website](https://dicnunz.github.io/folio/)
 - [Project plan](docs/documents/first-semester/project-plan/project-plan-2026-08-30.pdf)
 - [Plan presentation](docs/documents/first-semester/project-plan/plan-presentation-1.pdf)
+
+## Run the local M2 application (Python 3.11)
+
+```sh
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m streamlit run app.py
+```
+
+The default database is `data/academic.sqlite3`. Set `FOLIO_DATABASE` to use a different database. Startup restores existing records.
+
+For a disposable plan/task/feedback demonstration, choose a new temporary path:
+
+```sh
+.venv/bin/python -m scripts.seed_academic_fixture /tmp/folio-review.sqlite3
+FOLIO_DATABASE=/tmp/folio-review.sqlite3 .venv/bin/python -m streamlit run app.py
+```
+
+Add/edit coursework, import CSV, and open a saved plan. Stop and restart the server with the same database path to verify restoration. The fixture command refuses an existing destination.
+
+Run the application tests from the repository root with `.venv/bin/python -m pytest tests -v`. Run the preserved demo suite separately from `demos/` with `../.venv/bin/python -m pytest tests -v` (the M1 suite uses `src` import layout).
+
+See [CSE-22 implementation, test evidence, and remaining integration](evidence/cse-22/README.md) for interfaces, screenshots, measured timings, rollback coverage, and the M2 contribution handoff.
 
 ## Planned functionality
 

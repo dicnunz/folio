@@ -1,0 +1,104 @@
+{
+  "coursework": [
+    {
+      "id": 1,
+      "course": "CS 491",
+      "item_name": "Revised before restart",
+      "due_date": "2026-10-26",
+      "score": null,
+      "source": "manual"
+    },
+    {
+      "id": 2,
+      "course": "Browser course",
+      "item_name": "Browser saved 0",
+      "due_date": "2026-10-26",
+      "score": null,
+      "source": "manual"
+    },
+    {
+      "id": 3,
+      "course": "Browser course",
+      "item_name": "Browser saved 1",
+      "due_date": "2026-10-26",
+      "score": null,
+      "source": "manual"
+    },
+    {
+      "id": 4,
+      "course": "Browser course",
+      "item_name": "Browser saved 2",
+      "due_date": "2026-10-26",
+      "score": null,
+      "source": "manual"
+    },
+    {
+      "id": 5,
+      "course": "Imported",
+      "item_name": "CSV record",
+      "due_date": "2026-10-26",
+      "score": null,
+      "source": "csv"
+    }
+  ],
+  "plans": [
+    {
+      "id": 1,
+      "coursework_id": 1,
+      "name": "Plan A",
+      "template_id": "fixture",
+      "notes": "Latest saved revision, restored after process restart.",
+      "active": 1
+    },
+    {
+      "id": 2,
+      "coursework_id": 1,
+      "name": "Plan B",
+      "template_id": "fixture",
+      "notes": "CSE-22 test fixture for persistence verification.",
+      "active": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "plan_id": 1,
+      "name": "Review",
+      "start_time": "2026-10-24T14:00",
+      "end_time": "2026-10-24T15:00",
+      "completed": 0
+    },
+    {
+      "id": 3,
+      "plan_id": 2,
+      "name": "Review",
+      "start_time": "2026-10-22T11:00",
+      "end_time": "2026-10-22T12:00",
+      "completed": 1
+    },
+    {
+      "id": 4,
+      "plan_id": 2,
+      "name": "Revise",
+      "start_time": "2026-10-23T11:00",
+      "end_time": "2026-10-23T12:00",
+      "completed": 0
+    }
+  ],
+  "feedback": [
+    {
+      "id": 1,
+      "plan_id": 1,
+      "suggestion": "Clarify the validation examples.",
+      "decision": "adapt",
+      "adapted_text": "Latest entered feedback"
+    },
+    {
+      "id": 2,
+      "plan_id": 2,
+      "suggestion": "Clarify the validation examples.",
+      "decision": "adapt",
+      "adapted_text": "Add one invalid-row example."
+    }
+  ]
+}
