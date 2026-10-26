@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-10-25T21:47:33.775675-04:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.11",
+  "sqlite": "3.53.4",
+  "base_commit": "0ddb2c0a160df903c3d926dd813abf23301c7b0d",
+  "scope": "real coursework controls and schedule UI; fixture-assisted plans, task deletion and plan deletion; export/revision screens unavailable",
+  "timing_method": "perf_counter immediately before button click through rendered schedule/conflict assertions",
+  "correction_seconds": [
+    0.08589070895686746,
+    0.07070787507109344,
+    0.07174808299168944
+  ],
+  "conflict_seconds": [
+    0.14539175014942884,
+    0.14975854218937457,
+    0.13506754208356142
+  ],
+  "checks": [
+    "PASS real manual and CSV coursework entry persisted",
+    "PASS C8/C9 saved overlaps identify all affected tasks; three rejected and three accepted corrections"
+  ],
+  "browser": "156.0.8078.4",
+  "fixture_counts": {
+    "coursework": 2,
+    "plans": 2,
+    "tasks": 4,
+    "feedback": 1
+  },
+  "database_bytes_start": 40960,
+  "status": "FAIL",
+  "error": "Locator expected to be visible\nActual value: None\nError: element(s) not found \nCall log:\n  - Expect \"to_be_visible\" get_by_text(\"Task #1 saved: 2026-10-26T09:00 \u2192 2026-10-26T10:00.\", exact=True) with timeout 5000ms\n  - waiting for get_by_text(\"Task #1 saved: 2026-10-26T09:00 \u2192 2026-10-26T10:00.\", exact=True)\n\nAria snapshot:\n- banner:\n  - button \"Deploy\"\n  - button\n- heading \"Folio\" [level=1]\n- paragraph: Academic planning \u2022 saved locally\n- heading \"Coursework\" [level=2]\n- textbox \"Course\":\n  - /placeholder: \"\"\n- textbox \"Assignment name\":\n  - /placeholder: \"\"\n- textbox \"Due date (YYYY-MM-DD)\":\n  - /placeholder: \"\"\n- textbox \"Score (optional)\":\n  - /placeholder: \"\"\n- textbox \"Start time (optional, YYYY-MM-DDTHH:MM)\":\n  - /placeholder: \"\"\n- textbox \"End time (optional, YYYY-MM-DDTHH:MM)\":\n  - /placeholder: \"\"\n- button \"Save coursework\":\n  - paragraph: Save coursework\n- heading \"Import CSV\" [level=3]\n- paragraph: \"Required columns: course, item_name, due_date (YYYY-MM-DD). Optional: score (numeric), start_time and end_time (YYYY-MM-DDTHH:MM, 24-hour local time). Supply both times or leave both blank; end must be later than start. UTF-8 CSV; duplicates use the three required fields.\"\n- region \"Coursework CSV\":\n  - button \"Choose File\"\n  - text: Drag and drop file here Limit 200MB per file \u2022 CSV\n  - button \"Browse files\"\n- button \"Import coursework\" [disabled]:\n  - paragraph: Import coursework\n- text: CS 491 \u2014 Integrated schedule review (#1)\n- combobox \"Selected CS 491 \u2014 Integrated schedule review (#1). Saved coursework\"\n- img \"open\"\n- textbox \"Edit course\":\n  - /placeholder: \"\"\n  - text: CS 491\n- textbox \"Edit assignment name\":\n  - /placeholder: \"\"\n  - text: Integrated schedule review\n- textbox \"Edit due date (YYYY-MM-DD)\":\n  - /placeholder: \"\"\n  - text: 2026-10-30\n- textbox \"Edit score (optional)\":\n  - /placeholder: \"\"\n- textbox \"Edit start time (YYYY-MM-DDTHH:MM)\":\n  - /placeholder: \"\"\n- textbox \"Edit end time (YYYY-MM-DDTHH:MM)\":\n  - /placeholder: \"\"\n- button \"Save changes\":\n  - paragraph: Save changes\n- button \"Delete selected coursework\":\n  - paragraph: Delete selected coursework\n- button \"Show/hide columns\"\n- button \"Download as CSV\"\n- button \"Search\"\n- button \"Fullscreen\"\n- heading \"Combined schedule\" [level=2]\n- paragraph: Active plans only. Times are local; weeks run Monday\u2013Sunday. Touching times do not conflict.\n- radiogroup \"Schedule view\":\n  - radio \"Daily\"\n  - paragraph: Daily\n  - radio \"Weekly\" [checked]\n  - paragraph: Weekly\n- textbox \"Select a date.\":\n  - /placeholder: YYYY/MM/DD\n  - text: 2026/10/26\n- paragraph: Press the down arrow key to interact with the calendar and select a date. Press the escape button to close the calendar.\n- paragraph: Selected date is 2026/10/26. Select the second date.\n- button \"Refresh schedule\":\n  - paragraph: Refresh schedule\n- text: \"#1 \u2014 Review | CS 491 / Plan A\"\n- 'combobox \"Selected #1 \u2014 Review | CS 491 / Plan A. Task to correct\"'\n- img \"open\"\n- paragraph: \"Saved: 2026-10-26T10:00 \u2192 2026-10-26T11:00. Enter both date and time as YYYY-MM-DDTHH:MM.\"\n- textbox \"New start time\":\n  - /placeholder: \"\"\n  - text: 2026-10-26T10:00\n- textbox \"New end time\":\n  - /placeholder: \"\"\n  - text: 2026-10-26T11:00\n- button \"Save corrected times\":\n  - paragraph: Save corrected times\n- alert:\n  - paragraph: \"Task #1 saved: 2026-10-26T10:00 \u2192 2026-10-26T11:00.\"\n- 'heading \"Weekly schedule: 2026-10-26 to 2026-11-01\" [level=3]'\n- button \"Show/hide columns\"\n- button \"Download as CSV\"\n- button \"Search\"\n- button \"Fullscreen\"\n- alert:\n  - paragraph: No conflicts in this period.\n- heading \"Saved plans\" [level=2]\n- text: Plan A (#1)\n- combobox \"Selected Plan A (#1). Plan\"\n- img \"open\"\n- button \"Open saved plan\":\n  - paragraph: Open saved plan"
+}

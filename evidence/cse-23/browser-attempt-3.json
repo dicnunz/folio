@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-10-25T21:46:37.218605-04:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.11",
+  "sqlite": "3.53.4",
+  "base_commit": "0ddb2c0a160df903c3d926dd813abf23301c7b0d",
+  "scope": "real coursework controls and schedule UI; fixture-assisted plans, task deletion and plan deletion; export/revision screens unavailable",
+  "timing_method": "perf_counter immediately before button click through rendered schedule/conflict assertions",
+  "correction_seconds": [],
+  "conflict_seconds": [],
+  "checks": [
+    "PASS real manual and CSV coursework entry persisted"
+  ],
+  "browser": "156.0.8078.4",
+  "fixture_counts": {
+    "coursework": 2,
+    "plans": 2,
+    "tasks": 4,
+    "feedback": 1
+  },
+  "database_bytes_start": 40960,
+  "status": "FAIL",
+  "error": "Locator.check: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"radio\", name=\"Daily\", exact=True)\n    - locator resolved to <input name=\"\" value=\"0\" type=\"radio\" tabindex=\"-1\" class=\"st-e6 st-da st-ar st-b5 st-as st-b6 st-cz st-d1 st-d0 st-bu st-e7 st-d6\"/>\n  - attempting click action\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 \u00d7 waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    28 \u00d7 waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+}

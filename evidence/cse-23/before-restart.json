@@ -1,0 +1,77 @@
+{
+  "coursework": [
+    {
+      "id": 1,
+      "course": "CS 491",
+      "item_name": "Integrated schedule review",
+      "due_date": "2026-10-30",
+      "score": null,
+      "source": "manual",
+      "start_time": null,
+      "end_time": null
+    },
+    {
+      "id": 2,
+      "course": "CS 310",
+      "item_name": "Imported context",
+      "due_date": "2026-10-30",
+      "score": null,
+      "source": "csv",
+      "start_time": null,
+      "end_time": null
+    }
+  ],
+  "plans": [
+    {
+      "id": 1,
+      "coursework_id": 1,
+      "name": "Plan A",
+      "template_id": "cse23-fixture",
+      "notes": "Latest revision from the plan fixture; no export/revision UI available.",
+      "active": 1
+    },
+    {
+      "id": 2,
+      "coursework_id": 1,
+      "name": "Plan B",
+      "template_id": "cse23-fixture",
+      "notes": "",
+      "active": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "plan_id": 1,
+      "name": "Review",
+      "start_time": "2026-10-26T09:00",
+      "end_time": "2026-10-26T10:00",
+      "completed": 0
+    },
+    {
+      "id": 3,
+      "plan_id": 1,
+      "name": "Next-day review",
+      "start_time": "2026-10-27T10:00",
+      "end_time": "2026-10-27T11:00",
+      "completed": 0
+    },
+    {
+      "id": 4,
+      "plan_id": 2,
+      "name": "Review",
+      "start_time": "2026-10-26T11:00",
+      "end_time": "2026-10-26T12:00",
+      "completed": 0
+    }
+  ],
+  "feedback": [
+    {
+      "id": 1,
+      "plan_id": 1,
+      "suggestion": "Fixture feedback for restoration checks.",
+      "decision": null,
+      "adapted_text": null
+    }
+  ]
+}

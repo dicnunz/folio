@@ -142,6 +142,20 @@ class AcademicRepository:
             saved = self._get_plan(connection, plan_id)
         return saved
 
+    def delete_plan(self, plan_id):
+        """Explicitly delete a plan and its owned tasks/feedback in one transaction.
+
+        Coursework and every other plan are preserved. This is an aggregate
+        deletion API for the plan owner, not implicit coursework cascading.
+        """
+        with self.transaction() as transaction:
+            connection = transaction.connection
+            if connection.execute("SELECT id FROM plans WHERE id=?", (plan_id,)).fetchone() is None:
+                raise RepositoryError("Plan was not found.")
+            connection.execute("DELETE FROM feedback WHERE plan_id=?", (plan_id,))
+            connection.execute("DELETE FROM tasks WHERE plan_id=?", (plan_id,))
+            connection.execute("DELETE FROM plans WHERE id=?", (plan_id,))
+
     @staticmethod
     def _save_children(connection, table, plan_id, records, fields, defaults):
         # table/fields are internal constants, never supplied by the caller.
@@ -208,6 +222,18 @@ class CourseworkTransaction:
     """Implements the repository contract already consumed by CSE-20."""
     def __init__(self, connection):
         self.connection = connection
+
+    def academic_state(self):
+        """Snapshot inside the current transaction for scheduling decisions."""
+        return {table: [dict(row) for row in self.connection.execute(f"SELECT * FROM {table} ORDER BY id")]
+                for table in ("coursework", "plans", "tasks", "feedback")}
+
+    def update_task_times(self, task_id, start_time, end_time):
+        cursor = self.connection.execute(
+            "UPDATE tasks SET start_time=?,end_time=? WHERE id=?", (start_time, end_time, task_id))
+        if cursor.rowcount != 1:
+            raise RepositoryError("Task was not found.")
+        return dict(self.connection.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone())
 
     def list_records(self):
         return [dict(row) for row in self.connection.execute("SELECT * FROM coursework ORDER BY id")]

@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-10-25T21:49:41.730943-04:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.11",
+  "sqlite": "3.53.4",
+  "base_commit": "0ddb2c0a160df903c3d926dd813abf23301c7b0d",
+  "scope": "real coursework controls and schedule UI; fixture-assisted plans, task deletion and plan deletion; export/revision screens unavailable",
+  "timing_method": "perf_counter immediately before button click through rendered schedule/conflict assertions",
+  "correction_seconds": [
+    0.07143549993634224,
+    0.06919054198078811,
+    0.06693212501704693
+  ],
+  "conflict_seconds": [
+    0.08254975010640919,
+    0.08102533407509327,
+    0.08177570812404156
+  ],
+  "checks": [
+    "PASS real manual and CSV coursework entry persisted",
+    "PASS C8/C9 saved overlaps identify all affected tasks; three rejected and three accepted corrections",
+    "PASS C7/N3 actual Streamlit process restart preserves corrected A1 ID/plan, deleted A2, unchanged B1",
+    "PASS active-plan filtering and explicit plan deletion reflected in real schedule"
+  ],
+  "browser": "156.0.8078.4",
+  "fixture_counts": {
+    "coursework": 2,
+    "plans": 2,
+    "tasks": 4,
+    "feedback": 1
+  },
+  "database_bytes_start": 40960,
+  "database_bytes_end": 40960,
+  "source_sha256": {
+    "app.py": "577d95288ba6ab2ecc41624f439812e3be8e95fd7d31a110a391b22341dd0f89",
+    "demos/src/scheduling.py": "3be0d4fce1ef6a1d80febe2bfc56e3abaeb081d73f3abcc4887b272de3aeeaf7",
+    "folio/__init__.py": "e23205a9482d697dafca3498d948568e5366f7acfae15053cc30a7be72e5e220",
+    "folio/application.py": "f31e174d628fdd4921b1307a2b6f73cfcd2798912d99228003ae444ec98ac206",
+    "folio/coursework_ui.py": "d7bfe72f15bf39a74425f5d683d4e5c06c60fde7182366bd5dd8065199c43c37",
+    "folio/schedule_service.py": "426fa6ed88fda0261eb6be63a6b11918119998bf51ac85bb90128f42592aa51b",
+    "folio/schedule_ui.py": "5920ac83fb93e485f7ced328ff693741d211041e5a7070b465c0111aeeb5aeca",
+    "folio/storage.py": "c6e0288ca556eff2ad0bd134d7589b0131fb0c8863bd4472c320d867ac1a4d6e",
+    "scripts/verify_cse23_browser.py": "8632276c0ab1a564f4946e0f15a8c4da42bbdc52ac26082f77c795df6cdb4974"
+  },
+  "status": "PASS"
+}

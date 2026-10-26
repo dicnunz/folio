@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-10-25T21:48:30.569534-04:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "python": "3.11.11",
+  "sqlite": "3.53.4",
+  "base_commit": "0ddb2c0a160df903c3d926dd813abf23301c7b0d",
+  "scope": "real coursework controls and schedule UI; fixture-assisted plans, task deletion and plan deletion; export/revision screens unavailable",
+  "timing_method": "perf_counter immediately before button click through rendered schedule/conflict assertions",
+  "correction_seconds": [
+    0.06551133305765688,
+    0.07428191718645394,
+    0.07123491587117314
+  ],
+  "conflict_seconds": [
+    0.06600079196505249,
+    0.06927337497472763,
+    0.06787387514486909
+  ],
+  "checks": [
+    "PASS real manual and CSV coursework entry persisted",
+    "PASS C8/C9 saved overlaps identify all affected tasks; three rejected and three accepted corrections",
+    "PASS C7/N3 actual Streamlit process restart preserves corrected A1 ID/plan, deleted A2, unchanged B1"
+  ],
+  "browser": "156.0.8078.4",
+  "fixture_counts": {
+    "coursework": 2,
+    "plans": 2,
+    "tasks": 4,
+    "feedback": 1
+  },
+  "database_bytes_start": 40960,
+  "status": "FAIL",
+  "error": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"option\", name=re.compile(r\"^#4 \u2014\"))\n"
+}

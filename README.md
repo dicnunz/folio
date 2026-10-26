@@ -6,7 +6,7 @@ Folio is a student academic planning app in development. It is intended to help 
 
 ## Current status
 
-The M2 local Streamlit application now persists coursework, plans, tasks, and entered feedback in SQLite. Coursework controls use the CSE-20 validation service. Plan/task editing and the full planning/export workflow remain under development; explicit fixtures exercise their storage interfaces. The original M1 demos remain unchanged.
+The M2 local Streamlit application persists coursework, plans, tasks, and entered feedback in SQLite. Coursework controls use the CSE-20 validation service. The combined daily/weekly schedule shows active-plan tasks, explains conflicts, and lets the student save corrected times. Plan creation/editing and the full planning/export workflow remain under development; explicit fixtures exercise their storage interfaces. The original M1 demos remain runnable.
 
 - [Project website](https://dicnunz.github.io/folio/)
 - [Project plan](docs/documents/first-semester/project-plan/project-plan-2026-08-30.pdf)
@@ -34,6 +34,23 @@ Add/edit coursework, import CSV, and open a saved plan. Stop and restart the ser
 Run the application tests from the repository root with `.venv/bin/python -m pytest tests -v`. Run the preserved demo suite separately from `demos/` with `../.venv/bin/python -m pytest tests -v` (the M1 suite uses `src` import layout).
 
 See [CSE-22 implementation, test evidence, and remaining integration](evidence/cse-22/README.md) for interfaces, screenshots, measured timings, rollback coverage, and the M2 contribution handoff.
+
+## Combined schedule and conflict correction
+
+The **Combined schedule** screen reads saved tasks from active plans. Choose Daily or Weekly and a date (weeks run Monday–Sunday). Every row retains its task ID, course, plan, plan ID, and full time interval. Conflict indicators identify the other task IDs, and each warning spells out both tasks and their overlap. Touching endpoints do not conflict; overnight tasks appear on each day they intersect.
+
+Select **Task to correct**, enter local `YYYY-MM-DDTHH:MM` start/end values, and choose **Save corrected times**. Invalid or conflicting corrections leave the saved interval unchanged. The app reloads saved plan changes on each interaction; **Refresh schedule** also picks up edits from another session. Inactive/deleted plans and removed tasks disappear from the combined schedule.
+
+To review a disposable example with two overlapping plans:
+
+```sh
+.venv/bin/python -m scripts.seed_schedule_fixture /tmp/folio-schedule-review.sqlite3
+FOLIO_DATABASE=/tmp/folio-schedule-review.sqlite3 .venv/bin/python -m streamlit run app.py
+```
+
+Choose October 26, 2026. Task #2 overlaps tasks #1 and #4. Correct task #2 to `2026-10-26T12:00`–`2026-10-26T13:00`, then restart using the same database to verify it remains saved. The fixture command refuses existing files and is never run at application startup.
+
+See [CSE-23 implementation and actual evidence](evidence/cse-23/README.md) for tests, screenshots, timings, module handoff, and the unavailable full planning/export/revision integration checkpoint. Coursework CSV intervals remain context; they do not automatically create plan tasks.
 
 ## Coursework CSV format
 

@@ -1,3 +1,13 @@
+"""Scheduling domain rules, independent of Streamlit and SQLite."""
+from datetime import date, datetime, time, timedelta
+import re
+
+
+def intervals_overlap(start_a, end_a, start_b, end_b):
+   """Half-open intervals: touching endpoints do not overlap."""
+   return start_a < end_b and end_a > start_b
+
+
 class Task:
    """Represent one scheduled task."""
 
@@ -35,8 +45,10 @@ class Schedule:
       if task.start_time >= task.end_time:
          raise ValueError("Task start time must be before end time.")
 
-      if task.start_time < 0 or task.end_time < 0:
-         raise ValueError("Task start and end times must be non-negative.")
+      # Keep numeric M1 demos working, while supporting dated M2 tasks.
+      if not isinstance(task.start_time, datetime):
+         if task.start_time < 0 or task.end_time < 0:
+            raise ValueError("Task start and end times must be non-negative.")
 
    def add_task(self, task):
       """Add a valid, unique task and return any time conflicts."""
@@ -114,3 +126,74 @@ class Schedule:
       task.end_time = new_end_time
       self.task_signatures.add(new_signature)
       return []
+
+
+def parse_task_time(value):
+   """Parse the stored local minute-precision date/time contract."""
+   if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}", value):
+      raise ValueError("Use YYYY-MM-DDTHH:MM (24-hour local time).")
+   try:
+      return datetime.strptime(value, "%Y-%m-%dT%H:%M")
+   except ValueError as error:
+      raise ValueError("Use a valid date and time in YYYY-MM-DDTHH:MM format.") from error
+
+
+def validate_task_times(start_time, end_time):
+   """Collect both field errors without changing a stored task."""
+   parsed, errors = {}, []
+   for field, value in (("start_time", start_time), ("end_time", end_time)):
+      try:
+         parsed[field] = parse_task_time(value)
+      except ValueError as error:
+         errors.append({"field": field, "message": str(error)})
+   if len(parsed) == 2 and parsed["start_time"] >= parsed["end_time"]:
+      errors.append({"field": "end_time", "message": "End time must be later than start time."})
+   return errors
+
+
+def combine_active_tasks(state):
+   """Join saved identities/context and annotate every active conflicting task.
+
+   Saved overlaps are retained, never rescheduled or deduplicated on load.
+   Malformed active intervals are reported explicitly rather than hidden.
+   """
+   plans = {plan["id"]: plan for plan in state["plans"] if plan["active"]}
+   courses = {row["id"]: row for row in state["coursework"]}
+   rows, errors, parsed = [], [], {}
+   for task in state["tasks"]:
+      plan = plans.get(task["plan_id"])
+      if plan is None:
+         continue
+      problems = validate_task_times(task["start_time"], task["end_time"])
+      if problems:
+         errors.append({"task_id": task["id"], "plan_id": plan["id"], "errors": problems})
+         continue
+      course = courses[plan["coursework_id"]]
+      row = {**task, "plan": plan["name"], "course": course["course"],
+             "coursework_id": course["id"], "conflict_ids": []}
+      parsed[row["id"]] = (parse_task_time(row["start_time"]), parse_task_time(row["end_time"]))
+      rows.append(row)
+   rows.sort(key=lambda row: (parsed[row["id"]][0], row["id"]))
+   for index, first in enumerate(rows):
+      start_a, end_a = parsed[first["id"]]
+      for second in rows[index + 1:]:
+         start_b, end_b = parsed[second["id"]]
+         if start_b >= end_a:
+            break
+         if intervals_overlap(start_a, end_a, start_b, end_b):
+            first["conflict_ids"].append(second["id"])
+            second["conflict_ids"].append(first["id"])
+   for row in rows:
+      row["conflict_ids"].sort()
+   return {"tasks": rows, "errors": errors}
+
+
+def schedule_window(tasks, selected_date, view="Weekly"):
+   """Include tasks intersecting a day or Monday–Sunday week, even overnight."""
+   if type(selected_date) is not date or view not in ("Daily", "Weekly"):
+      raise ValueError("Choose a date and Daily or Weekly view.")
+   first = selected_date if view == "Daily" else selected_date - timedelta(days=selected_date.weekday())
+   start = datetime.combine(first, time.min)
+   end = start + timedelta(days=1 if view == "Daily" else 7)
+   return [row for row in tasks if intervals_overlap(
+      parse_task_time(row["start_time"]), parse_task_time(row["end_time"]), start, end)]
