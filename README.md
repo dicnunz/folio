@@ -4,6 +4,10 @@ A senior project at Florida Institute of Technology by **Nicholas Dunzelman and 
 
 Folio is a student academic planning app in development. It is intended to help students turn coursework into manageable tasks, combine tasks from multiple plans into one schedule, and follow through with optional task-completion rewards.
 
+## Hosted demonstration
+
+The [hosted demo](https://dicnunz-folio.streamlit.app/) linked from the course site is a standalone demonstration on `codex/course-site-app`. It illustrates workflows for review; it is not a release of the planned application or the baseline for future implementation.
+
 ## Current status
 
 The M2 local Streamlit application persists coursework, plans, tasks, and entered feedback in SQLite. Coursework controls use the CSE-20 validation service. The combined daily/weekly schedule shows active-plan tasks, explains conflicts, and lets the student save corrected times. Plan creation/editing and the full planning/export workflow remain under development; explicit fixtures exercise their storage interfaces. The original M1 demos remain runnable.
