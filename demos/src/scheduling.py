@@ -197,3 +197,32 @@ def schedule_window(tasks, selected_date, view="Weekly"):
    end = start + timedelta(days=1 if view == "Daily" else 7)
    return [row for row in tasks if intervals_overlap(
       parse_task_time(row["start_time"]), parse_task_time(row["end_time"]), start, end)]
+
+
+def combine_active_plan_tasks(state):
+   """Join dated tasks to active plans and coursework without name deduplication.
+
+   Times are local datetimes. Keep every stable task ID, even identical labels
+   and intervals, and mark every member of each overlapping pair.
+   """
+   plans = {row['id']: row for row in state['plans'] if row['active']}
+   coursework = {row['id']: row for row in state['coursework']}
+   tasks = []
+   for task in state['tasks']:
+      plan = plans.get(task['plan_id'])
+      if plan is None:
+         continue
+      start, end = (datetime.fromisoformat(task[field]) for field in ('start_time', 'end_time'))
+      if start.tzinfo is not None or end.tzinfo is not None or start >= end:
+         raise ValueError('Scheduled tasks need local times with end after start.')
+      tasks.append({**task, 'course': coursework[plan['coursework_id']]['course'],
+                    'plan_name': plan['name'], 'start': start, 'end': end, 'conflict_ids': []})
+   tasks.sort(key=lambda task: (task['start'], task['id']))
+   for index, first in enumerate(tasks):
+      for second in tasks[index + 1:]:
+         if second['start'] >= first['end']:
+            break
+         if first['start'] < second['end'] and first['end'] > second['start']:
+            first['conflict_ids'].append(second['id'])
+            second['conflict_ids'].append(first['id'])
+   return tasks

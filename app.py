@@ -1,41 +1,35 @@
-"""Run with: python -m streamlit run app.py."""
+"""Folio's local academic workflows. Run: python -m streamlit run app.py."""
 import streamlit as st
 
 from demos.src.coursework_service import RepositoryError
 from folio.application import open_application
-from folio.coursework_ui import render_coursework
-from folio.schedule_ui import render_schedule
+from folio_ui.coursework import render_coursework
 
-st.set_page_config(page_title="Folio", layout="wide")
-st.title("Folio")
-st.caption("Academic planning • saved locally")
 
-try:
-    repository, coursework_service = open_application()
-    render_coursework(repository, coursework_service)
-    render_schedule(repository)
-    state = repository.restore_saved_application_state()
-    st.header("Saved plans")
-    if not state["plans"]:
-        st.info("No saved plans yet.")
-    else:
-        plans = {plan["id"]: plan for plan in state["plans"]}
-        selected = st.selectbox("Plan", list(plans), format_func=lambda key: f"{plans[key]['name']} (#{key})")
-        if st.button("Open saved plan"):
-            st.session_state["open_plan"] = selected
-        if st.session_state.get("open_plan") in plans:
-            aggregate = repository.get_plan(st.session_state["open_plan"])
-            plan = aggregate["plan"]
-            coursework = next(row for row in state["coursework"] if row["id"] == plan["coursework_id"])
-            st.subheader(plan["name"])
-            st.write(f"Course: {coursework['course']} | Assignment: {coursework['item_name']}")
-            st.write(plan["notes"])
-            if aggregate["tasks"]:
-                st.dataframe(aggregate["tasks"], hide_index=True)
-            if aggregate["feedback"]:
-                st.subheader("Entered feedback")
-                st.dataframe(aggregate["feedback"], hide_index=True)
+def main(database_path=None, storage_caption="Saved locally on this computer."):
+    st.set_page_config(page_title="Folio", layout="centered")
+    with st.sidebar:
+        st.title("Folio")
+        screen = st.radio("Workspace", ["Coursework", "Plan", "Schedule", "Share"], key="folio_screen")
+        st.caption(storage_caption)
 
-except RepositoryError as error:
-    st.error(str(error))
-    st.stop()
+    try:
+        repository, coursework_service = open_application(database_path)
+        if screen == "Coursework":
+            render_coursework(coursework_service)
+        elif screen == "Plan":
+            from folio_ui.planning import render_planning
+            render_planning(repository)
+        elif screen == "Schedule":
+            from folio_ui.scheduling import render_schedule
+            render_schedule(repository)
+        elif screen == "Share":
+            from folio_ui.sharing import render_sharing
+            render_sharing(repository)
+    except RepositoryError as error:
+        st.error(str(error))
+        st.stop()
+
+
+if __name__ == "__main__":
+    main()

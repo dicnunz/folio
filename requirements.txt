@@ -1,3 +1,6 @@
 streamlit==1.49.1
 # Current Arrow wheels require NumPy 2; avoid inheriting an incompatible system install.
 numpy>=2,<3
+
+fpdf2>=2.8,<3
+python-docx>=1.1,<2

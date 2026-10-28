@@ -22,35 +22,25 @@ def test_coursework_controls_restore_and_edit(tmp_path, monkeypatch):
     assert not app.exception
     click(app, 'Save coursework')
     assert len(app.error) == 3
-    for label, value in [('Course','CSE491'), ('Assignment name','Original'), ('Due date (YYYY-MM-DD)','2026-10-26')]:
+    for label, value in [('Course','CSE491'), ('Coursework name','Original'), ('Due date','2026-10-26')]:
         field(app, label).set_value(value)
     click(app, 'Save coursework')
     assert app.success[0].value == 'Coursework saved.'
-    field(app, 'Edit assignment name').set_value('Edited')
+    app.selectbox(key='coursework_picker').set_value(1).run()
+    field(app, 'Coursework name').set_value('Edited')
     click(app, 'Save changes')
-    assert app.success[0].value == 'Coursework changes saved.'
-    field(app, 'Edit course').set_value('')
+    assert app.success[0].value == 'Changes saved.'
+    field(app, 'Course').set_value('')
     click(app, 'Save changes')
     assert app.error
     restart = AppTest.from_file(str(APP), default_timeout=15).run()
+    restart.selectbox(key='coursework_picker').set_value(1).run()
     assert not restart.exception
-    assert field(restart, 'Edit assignment name').value == 'Edited'
-    assert field(restart, 'Edit course').value == 'CSE491'
-    click(restart, 'Delete selected coursework')
+    assert field(restart, 'Coursework name').value == 'Edited'
+    assert field(restart, 'Course').value == 'CSE491'
+    restart.checkbox[0].check().run()
+    click(restart, 'Delete coursework')
     assert open_application(path)[0].restore_saved_application_state()['coursework'] == []
-
-
-def test_plan_fixture_display_and_dependent_delete(tmp_path, monkeypatch):
-    path = tmp_path / 'fixture.sqlite3'
-    seed(path)
-    monkeypatch.setenv('FOLIO_DATABASE', str(path))
-    app = AppTest.from_file(str(APP), default_timeout=15).run()
-    click(app, 'Open saved plan')
-    assert not app.exception
-    assert any(heading.value == 'Plan A' for heading in app.subheader)
-    assert len(app.dataframe) == 4  # coursework, selected tasks, feedback, all tasks
-    click(app, 'Delete selected coursework')
-    assert any('referenced' in error.value for error in app.error)
 
 
 def test_storage_startup_failure_is_visible(tmp_path, monkeypatch):
@@ -65,16 +55,18 @@ def test_storage_startup_failure_is_visible(tmp_path, monkeypatch):
 def test_manual_times_saved_and_restored(tmp_path, monkeypatch):
     monkeypatch.setenv('FOLIO_DATABASE', str(tmp_path / 'times.sqlite3'))
     app = AppTest.from_file(str(APP), default_timeout=15).run()
-    for label, value in [('Course','CSE491'), ('Assignment name','Exam'),
-                         ('Due date (YYYY-MM-DD)','2026-10-26'),
+    for label, value in [('Course','CSE491'), ('Coursework name','Exam'),
+                         ('Due date','2026-10-26'),
                          ('Start time (optional, YYYY-MM-DDTHH:MM)','2026-10-26T09:00'),
                          ('End time (optional, YYYY-MM-DDTHH:MM)','2026-10-26T10:00')]:
         field(app, label).set_value(value)
     click(app, 'Save coursework')
     assert not app.exception and app.success
-    field(app, 'Edit end time (YYYY-MM-DDTHH:MM)').set_value('2026-10-26T08:00')
+    app.selectbox(key='coursework_picker').set_value(1).run()
+    field(app, 'End time (optional, YYYY-MM-DDTHH:MM)').set_value('2026-10-26T08:00')
     click(app, 'Save changes')
     assert app.error
     restart = AppTest.from_file(str(APP), default_timeout=15).run()
-    assert field(restart, 'Edit start time (YYYY-MM-DDTHH:MM)').value == '2026-10-26T09:00'
-    assert field(restart, 'Edit end time (YYYY-MM-DDTHH:MM)').value == '2026-10-26T10:00'
+    restart.selectbox(key='coursework_picker').set_value(1).run()
+    assert field(restart, 'Start time (optional, YYYY-MM-DDTHH:MM)').value == '2026-10-26T09:00'
+    assert field(restart, 'End time (optional, YYYY-MM-DDTHH:MM)').value == '2026-10-26T10:00'

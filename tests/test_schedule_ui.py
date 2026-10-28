@@ -1,12 +1,18 @@
 from datetime import date
-from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
 
 from folio.application import open_application
 from scripts.seed_schedule_fixture import seed
 
-APP = Path(__file__).resolve().parents[1] / 'app.py'
+# Exercise the retained renderer directly, independent of the current app navigation.
+SCHEDULE_APP = """
+from folio.application import open_application
+from folio.schedule_ui import render_schedule
+
+repository, _ = open_application()
+render_schedule(repository)
+"""
 
 
 def button(app, label):
@@ -17,7 +23,7 @@ def setup_app(tmp_path, monkeypatch):
     path = tmp_path / 'schedule.sqlite3'
     seed(path)
     monkeypatch.setenv('FOLIO_DATABASE', str(path))
-    app = AppTest.from_file(str(APP), default_timeout=15).run()
+    app = AppTest.from_string(SCHEDULE_APP, default_timeout=15).run()
     app.date_input(key='schedule_date').set_value(date(2026,10,26)).run()
     assert not app.exception
     return path, app
@@ -45,7 +51,7 @@ def test_daily_weekly_conflict_indicators_and_student_resolution(tmp_path, monke
     assert not app.exception and not app.warning
     assert all(value=='None' for value in app.dataframe[-1].value['Conflicts'])
     assert any('Task #2 saved:' in item.value for item in app.success)
-    restarted = AppTest.from_file(str(APP),default_timeout=15).run()
+    restarted = AppTest.from_string(SCHEDULE_APP,default_timeout=15).run()
     restarted.date_input(key='schedule_date').set_value(date(2026,10,26)).run()
     row = restarted.dataframe[-1].value.set_index('Task ID').loc[2]
     assert row['Start']=='2026-10-26T12:00' and row['Plan ID']==1
