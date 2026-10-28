@@ -7,9 +7,9 @@ from folio_ui.coursework import render_coursework
 
 
 def main(database_path=None, storage_caption="Saved locally on this computer."):
-    st.set_page_config(page_title="Folio", layout="centered")
+    st.set_page_config(page_title="Folio v0.5", layout="centered")
     with st.sidebar:
-        st.title("Folio")
+        st.title("Folio v0.5")
         screen = st.radio("Workspace", ["Coursework", "Plan", "Schedule", "Share"], key="folio_screen")
         st.caption(storage_caption)
 
