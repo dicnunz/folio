@@ -1,4 +1,6 @@
-# Shared demo hosting
+# Standalone demonstration hosting
+
+This deployment supports project review only. Its shared password, storage adapter, and hosting setup are demo-specific and do not establish the architecture or starting point for the planned application.
 
 Run `streamlit run cloud_app.py` for the password-gated hosted app. `app.py` retains the local SQLite workflow.
 

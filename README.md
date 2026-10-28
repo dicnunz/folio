@@ -1,4 +1,10 @@
-# Folio
+# Folio demonstration
+
+The [hosted demo](https://dicnunz-folio.streamlit.app/) linked from the course site is a standalone demonstration on `codex/course-site-app`. It illustrates workflows for review; it is not a release of the planned application or the baseline for future implementation.
+
+The implementation and hosting choices in this branch are demo-specific. Future product work should follow the agreed project requirements and implementation plan; reuse of demo code must be an explicit decision.
+
+The documentation below records the milestone work this demonstration was assembled from.
 
 A senior project at Florida Institute of Technology by **Nicholas Dunzelman and Caleb Brooks**, advised by **Dr. David Luginbuhl**.
 
