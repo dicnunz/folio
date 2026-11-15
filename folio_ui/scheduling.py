@@ -7,7 +7,7 @@ from demos.src.coursework_service import RepositoryError
 from folio.scheduling import ScheduleService, describe_task, tasks_in_period
 
 
-def render_schedule(repository):
+def render_schedule(repository, follow_through_backend=None):
     st.title('Schedule')
     notice = st.session_state.pop('schedule_notice', None)
     if notice:
@@ -24,7 +24,9 @@ def render_schedule(repository):
     except (ValueError, RepositoryError) as error:
         st.error(str(error))
         return
+    from folio_ui.follow_through import render_follow_through
     if not tasks:
+        render_follow_through(repository, set(), follow_through_backend)
         st.info('No scheduled tasks in this period. Save a plan or choose another date.')
         return
     st.table([{'Task ID': task['id'], 'Course': task['course'], 'Plan': task['plan_name'],
@@ -58,3 +60,5 @@ def render_schedule(repository):
             st.rerun()
         except (ValueError, RepositoryError) as error:
             st.error(str(error))
+
+    render_follow_through(repository, {task['id'] for task in tasks}, follow_through_backend)
