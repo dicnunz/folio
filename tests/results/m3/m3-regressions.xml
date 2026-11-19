@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="0.046" timestamp="2026-11-18T20:59:16.213304-05:00" hostname="Mac.lan"><testcase classname="tests.results.m3.test_m3_regressions" name="test_deadline_late_preparation_is_rejected_without_mutation" time="0.009"><failure message="AssertionError: Task after coursework deadline 2026-10-30 was accepted&#10;assert not True">saved = (PosixPath('/private/var/folders/0v/0nyff7d53bxg0lj6b9vgncl80000gn/T/pytest-of-caleb/pytest-47/test_deadline_late_prep...olio.storage.AcademicRepository object at 0x105f29fd0&gt;, &lt;folio.schedule_service.ScheduleService object at 0x105f4b650&gt;)
+
+    def test_deadline_late_preparation_is_rejected_without_mutation(saved):
+        _, repo, service = saved
+        before = repo.RestoreSavedApplicationState()
+        outcome = service.reschedule_task(1, '2026-11-02T09:00', '2026-11-02T10:00')
+&gt;       assert not outcome['success'], 'Task after coursework deadline 2026-10-30 was accepted'
+E       AssertionError: Task after coursework deadline 2026-10-30 was accepted
+E       assert not True
+
+tests/results/m3/test_m3_regressions.py:24: AssertionError</failure></testcase><testcase classname="tests.results.m3.test_m3_regressions" name="test_valid_pre_deadline_correction_preserves_other_records" time="0.004" /><testcase classname="tests.results.m3.test_m3_regressions" name="test_completion_flags_repeat_undo_and_reopen_repository_only" time="0.007" /></testsuite></testsuites>

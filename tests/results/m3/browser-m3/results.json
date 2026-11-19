@@ -1,0 +1,99 @@
+{
+  "recorded_at": "2026-11-18T20:59:39.380326-05:00",
+  "python": "3.11.11",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "sqlite": "3.53.4",
+  "checks": [
+    {
+      "id": "S-touching",
+      "status": "PASS",
+      "observed": "Task 1 ends at 11:00; task 4 starts at 11:00; UI reports no conflicts."
+    },
+    {
+      "id": "E-invalid",
+      "status": "PASS",
+      "observed": "Invalid start rejected visibly; entire saved snapshot compared."
+    },
+    {
+      "id": "D-deadline-rejection",
+      "status": "FAIL",
+      "observed": "UI accepted and persisted task 1 on November 2, after associated coursework due October 30. No deadline validation feedback."
+    },
+    {
+      "id": "D-unrelated",
+      "status": "PASS",
+      "observed": "All unrelated task records unchanged after late save."
+    },
+    {
+      "id": "D-valid-correction",
+      "status": "PASS",
+      "observed": "Valid pre-deadline overnight correction saved."
+    },
+    {
+      "id": "S-overnight",
+      "status": "PASS",
+      "observed": "Overnight task saved through UI and available in next day schedule selector."
+    },
+    {
+      "id": "E-write-failure",
+      "status": "PASS",
+      "observed": "Actual SQLite trigger rejected write; UI storage error visible; saved snapshot unchanged."
+    },
+    {
+      "id": "E-stale-preservation",
+      "status": "PASS",
+      "observed": "External fixture update preserved when stale browser form submitted; UI reset to latest saved interval."
+    },
+    {
+      "id": "P-import-500",
+      "status": "PASS",
+      "observed": "Three real UI imports accepted 500 distinct rows each; persisted counts checked."
+    },
+    {
+      "id": "E-integrity",
+      "status": "PASS",
+      "observed": "SQLite integrity and foreign-key checks passed."
+    }
+  ],
+  "csv_500_seconds": [
+    0.13227495877072215,
+    0.1260775001719594,
+    0.11558670829981565
+  ],
+  "method": "perf_counter before Import coursework click until fresh visible accepted/rejected result and Import processed confirmation; upload excluded",
+  "database_bytes_start": 40960,
+  "browser": "156.0.8078.4",
+  "stale_ui_alerts": [
+    "No conflicts in this period."
+  ],
+  "available_buttons": [
+    "Deploy",
+    "",
+    "Save coursework",
+    "",
+    "Browse files",
+    "Import coursework",
+    "Save changes",
+    "Delete selected coursework",
+    "",
+    "",
+    "",
+    "",
+    "Refresh schedule",
+    "Save corrected times",
+    "",
+    "",
+    "",
+    "",
+    "Open saved plan"
+  ],
+  "completion_reminder_controls": "No completion, undo, progress or reminder controls in app.py/schedule_ui.py or observed UI; not executable.",
+  "counts_end": {
+    "coursework": 1501,
+    "plans": 2,
+    "tasks": 3,
+    "feedback": 1
+  },
+  "database_bytes_end": 184320,
+  "status": "COMPLETED_WITH_DEADLINE_DEFECT"
+}

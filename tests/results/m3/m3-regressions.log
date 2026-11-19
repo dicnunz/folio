@@ -1,0 +1,28 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.11, pytest-9.1.1, pluggy-1.7.0 -- /private/tmp/folio-m3-venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/caleb/Desktop/School/Senior Design/folio
+collecting ... collected 3 items
+
+tests/results/m3/test_m3_regressions.py::test_deadline_late_preparation_is_rejected_without_mutation FAILED [ 33%]
+tests/results/m3/test_m3_regressions.py::test_valid_pre_deadline_correction_preserves_other_records PASSED [ 66%]
+tests/results/m3/test_m3_regressions.py::test_completion_flags_repeat_undo_and_reopen_repository_only PASSED [100%]
+
+=================================== FAILURES ===================================
+_________ test_deadline_late_preparation_is_rejected_without_mutation __________
+
+saved = (PosixPath('/private/var/folders/0v/0nyff7d53bxg0lj6b9vgncl80000gn/T/pytest-of-caleb/pytest-47/test_deadline_late_prep...olio.storage.AcademicRepository object at 0x105f29fd0>, <folio.schedule_service.ScheduleService object at 0x105f4b650>)
+
+    def test_deadline_late_preparation_is_rejected_without_mutation(saved):
+        _, repo, service = saved
+        before = repo.RestoreSavedApplicationState()
+        outcome = service.reschedule_task(1, '2026-11-02T09:00', '2026-11-02T10:00')
+>       assert not outcome['success'], 'Task after coursework deadline 2026-10-30 was accepted'
+E       AssertionError: Task after coursework deadline 2026-10-30 was accepted
+E       assert not True
+
+tests/results/m3/test_m3_regressions.py:24: AssertionError
+- generated xml file: /Users/caleb/Desktop/School/Senior Design/folio/tests/results/m3/m3-regressions.xml -
+=========================== short test summary info ============================
+FAILED tests/results/m3/test_m3_regressions.py::test_deadline_late_preparation_is_rejected_without_mutation
+========================= 1 failed, 2 passed in 0.05s ==========================
