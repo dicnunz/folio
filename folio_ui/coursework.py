@@ -140,6 +140,20 @@ def render_coursework(service):
         show_errors(result["errors"])
 
     if selected_id is not None:
+        cutoff = service.repository.preparation_contexts()[selected_id]["cutoff"] or ""
+        with st.expander("Preparation cutoff"):
+            with st.form(f"cutoff_{selected_id}_{cutoff}"):
+                value = st.text_input("Assessment start or submission cutoff (YYYY-MM-DDTHH:MM)", value=cutoff,
+                                      help="Separate from a class meeting. Leave blank if only the due date is known.")
+                save_cutoff = st.form_submit_button("Save cutoff")
+            if save_cutoff:
+                try:
+                    service.repository.set_preparation_cutoff(selected_id, value)
+                except (ValueError, RepositoryError) as error:
+                    st.error(str(error))
+                else:
+                    st.session_state["coursework_notice"] = "Cutoff saved. Check linked preparation tasks in Plan or Schedule."
+                    st.rerun()
         if st.button("Use for planning"):
             st.session_state["planning_coursework_id"] = selected_id
             st.session_state["planning_coursework"] = dict(original)

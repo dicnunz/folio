@@ -38,7 +38,7 @@ def test_remove_and_add_task(tmp_path):
     repo, app = build_app(tmp_path)
     click(app, 'Start plan')
     assert next(b for b in app.button if b.label == 'Remove Tasks').disabled
-    app.checkbox[0].check().run()
+    app.checkbox(key='plan_' + str(app.session_state['plan_revision']) + '_0_remove').check().run()
     assert not next(b for b in app.button if b.label == 'Remove Tasks').disabled
     click(app, 'Remove Tasks')
     assert len(app.session_state['plan_draft']['tasks']) == 2
@@ -77,8 +77,8 @@ def test_multiple_removal_retains_edits_until_saved(tmp_path):
     click(app, 'Save plan')
     before = repo.RestoreSavedApplicationState()
     app.text_input[4].input('Keep edited task').run()
-    app.checkbox[0].check().run()
-    app.checkbox[2].check().run()
+    app.checkbox(key='plan_' + str(app.session_state['plan_revision']) + '_0_remove').check().run()
+    app.checkbox(key='plan_' + str(app.session_state['plan_revision']) + '_2_remove').check().run()
     click(app, 'Remove Tasks')
     assert [t['name'] for t in app.session_state['plan_draft']['tasks']] == ['Keep edited task']
     assert repo.RestoreSavedApplicationState() == before
@@ -91,10 +91,10 @@ def test_multiple_removal_retains_edits_until_saved(tmp_path):
 def test_selection_alone_does_not_remove_on_save_or_add(tmp_path):
     repo, app = build_app(tmp_path)
     click(app, 'Start plan')
-    app.checkbox[0].check().run()
+    app.checkbox(key='plan_' + str(app.session_state['plan_revision']) + '_0_remove').check().run()
     click(app, 'Save plan')
     assert len(repo.RestoreSavedApplicationState()['tasks']) == 3
-    app.checkbox[0].check().run()
+    app.checkbox(key='plan_' + str(app.session_state['plan_revision']) + '_0_remove').check().run()
     click(app, 'Add Task')
     assert len(app.session_state['plan_draft']['tasks']) == 4
 

@@ -42,6 +42,10 @@ def render_schedule(repository, follow_through_backend=None):
             if pair not in pairs:
                 pairs.add(pair)
                 st.warning(f"Conflict: {describe_task(task)} overlaps {describe_task(all_indexed[other_id])}.")
+    for task in tasks:
+        finding = task.get('preparation_notice')
+        if finding:
+            (st.warning if finding[0] == 'late' else st.caption)(finding[1])
     if not pairs:
         st.success('No time conflicts in this period.')
     st.subheader('Correct a task time')
@@ -55,7 +59,7 @@ def render_schedule(repository, follow_through_backend=None):
         save = st.form_submit_button('Save corrected time')
     if save:
         try:
-            service.correct_time(task_id, start, end)
+            service.correct_time(task_id, start, end, (task['start_time'], task['end_time']))
             st.session_state['schedule_notice'] = f'Time corrected for task #{task_id}.'
             st.rerun()
         except (ValueError, RepositoryError) as error:

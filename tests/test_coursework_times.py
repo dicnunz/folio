@@ -75,7 +75,7 @@ def test_v1_upgrade_preserves_records_and_relationships(tmp_path):
     assert service.edit_coursework(7, {'start_time': START, 'end_time': END})['success']
     repository.initialize()  # Repeat startup must not attempt the migration again.
     with sqlite3.connect(path) as connection:
-        assert connection.execute('PRAGMA user_version').fetchone()[0] == 2
+        assert connection.execute('PRAGMA user_version').fetchone()[0] == 4
         assert connection.execute('PRAGMA foreign_key_check').fetchall() == []
     with repository.transaction() as transaction:
         assert transaction.get(7)['start_time'] == START

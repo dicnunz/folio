@@ -2,7 +2,8 @@
 from datetime import datetime, time, timedelta
 
 from demos.src.scheduling import combine_active_plan_tasks
-from folio.planning import PlanningService
+from folio.deadlines import preparation_notice
+from folio.schedule_service import ScheduleService as StoredSchedule
 
 
 class ScheduleService:
@@ -10,29 +11,26 @@ class ScheduleService:
         self.repository = repository
 
     def tasks(self, selected_date=None, weekly=False):
-        tasks = combine_active_plan_tasks(self.repository.RestoreSavedApplicationState())
+        state = self.repository.RestoreSavedApplicationState()
+        tasks = combine_active_plan_tasks(state)
+        if any(task.get('preparation') for task in tasks):
+            contexts = self.repository.preparation_contexts()
+            linked = {plan['id']: plan['coursework_id'] for plan in state['plans']}
+            for task in tasks:
+                notice = preparation_notice(task, contexts.get(linked[task['plan_id']]))
+                if notice:
+                    task['preparation_notice'] = notice
         return tasks_in_period(tasks, selected_date, weekly)
 
-    def correct_time(self, task_id, start_text, end_text):
-        try:
-            start, end = (datetime.strptime(value, '%Y-%m-%dT%H:%M') for value in (start_text, end_text))
-            if start >= end:
-                raise ValueError()
-        except (TypeError, ValueError):
-            raise ValueError('Use local YYYY-MM-DDTHH:MM times, with end after start.') from None
-        tasks = self.tasks()
-        target = next((task for task in tasks if task['id'] == task_id), None)
-        if target is None:
-            raise ValueError('The active task is no longer available. Refresh the schedule.')
-        conflicts = [task for task in tasks if task['id'] != task_id and start < task['end'] and end > task['start']]
-        if conflicts:
-            detail = '; '.join(describe_task(task) for task in conflicts)
-            raise ValueError(f'Chosen time conflicts with {detail}. Saved time unchanged.')
-        planning = PlanningService(self.repository)
-        draft = planning.open_plan(target['plan_id'])
-        task = next(task for task in draft['tasks'] if task['id'] == task_id)
-        task.update(start_time=start.isoformat(timespec='minutes'), end_time=end.isoformat(timespec='minutes'))
-        return planning.save_plan(draft)
+    def correct_time(self, task_id, start_text, end_text, expected_times=None):
+        result = StoredSchedule(self.repository).reschedule_task(task_id, start_text, end_text, expected_times)
+        if result['success']:
+            return self.repository.get_plan(result['record']['plan_id'])
+        messages = [error['message'] for error in result['errors'] if error['field'] != 'times']
+        if result['conflicts']:
+            details = '; '.join(describe_task({**task, 'plan_name': task['plan']}) for task in result['conflicts'])
+            messages.append(f'Chosen time conflicts with {details}. Saved time unchanged.')
+        raise ValueError(' '.join(messages))
 
 
 def describe_task(task):

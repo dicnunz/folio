@@ -2,6 +2,8 @@
 from copy import deepcopy
 from datetime import datetime, time, timedelta
 
+from .storage import AcademicRepository
+
 TEMPLATES = {
     'assignment': ('Understand requirements', 'Prepare a draft', 'Review and submit'),
     'test': ('Identify topics', 'Practice questions', 'Review difficult topics'),
@@ -26,7 +28,8 @@ class PlanningService:
         for offset, name in enumerate(TEMPLATES[template_id]):
             task_start = start + timedelta(hours=offset)
             tasks.append({'name': name, 'start_time': task_start.isoformat(timespec='minutes'),
-                          'end_time': (task_start + timedelta(hours=1)).isoformat(timespec='minutes'), 'completed': False})
+                          'end_time': (task_start + timedelta(hours=1)).isoformat(timespec='minutes'), 'completed': False,
+                          'preparation': template_id == 'test'})
         return {'plan': {'coursework_id': coursework_id, 'name': item['item_name'],
                          'template_id': template_id, 'notes': '', 'active': True},
                 'tasks': tasks, 'feedback': []}
@@ -63,6 +66,7 @@ class PlanningService:
             raise ValueError('Add at least one task.')
         original = self.open_plan(revised['plan']['id']) if revised['plan'].get('id') else None
         previous = {task['id']: task for task in original['tasks']} if original else {}
+        local = isinstance(self.repository, AcademicRepository)
         for task in revised['tasks']:
             if not task['name'].strip():
                 raise ValueError('Every task needs a name.')
@@ -77,7 +81,10 @@ class PlanningService:
             task['start_time'] = start.isoformat(timespec='minutes')
             task['end_time'] = end.isoformat(timespec='minutes')
             if task.get('id') in previous:
-                task['completed'] = previous[task['id']]['completed']
+                if local:
+                    task.pop('completed', None)
+                else:
+                    task['completed'] = previous[task['id']]['completed']
             else:
                 task['completed'] = False
         return self.repository.StorePlanData(revised['plan'], revised['tasks'], revised['feedback'])

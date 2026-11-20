@@ -10,7 +10,7 @@ import sys
 from folio.application import open_application
 
 
-def add_sample_plans(repository, coursework_id, day=date(2026, 10, 26)):
+def add_sample_plans(repository, coursework_id, day=date(2026, 10, 26), prepare_first=False):
     """Attach two identified fixture plans to real, already-saved coursework."""
     if repository.restore_saved_application_state()["plans"]:
         raise ValueError("Sample plans require a test database without existing plans.")
@@ -18,7 +18,7 @@ def add_sample_plans(repository, coursework_id, day=date(2026, 10, 26)):
         prefix = (day + timedelta(days=offset)).isoformat()
         return {"name": name, "start_time": f"{prefix}T{start}", "end_time": f"{prefix}T{end}"}
     a = repository.StorePlanData({"coursework_id": coursework_id, "name": "Plan A", "template_id": "cse23-fixture"},
-        [task("Review", "10:00", "11:00"), task("Resolve overlap", "10:30", "11:30"),
+        [{**task("Review", "10:00", "11:00"), "preparation": prepare_first}, task("Resolve overlap", "10:30", "11:30"),
          task("Next-day review", "10:00", "11:00", 1)],
         [{"suggestion": "Fixture feedback for restoration checks."}])
     b = repository.StorePlanData({"coursework_id": coursework_id, "name": "Plan B", "template_id": "cse23-fixture"},
@@ -31,7 +31,7 @@ def seed(path):
         raise ValueError("Choose a new temporary database path; this file already exists.")
     repository, service = open_application(path)
     course = service.create_coursework({"course": "CS 491", "item_name": "Schedule review", "due_date": "2026-10-30"})["record"]
-    add_sample_plans(repository, course["id"])
+    add_sample_plans(repository, course["id"], prepare_first=True)
     return repository.restore_saved_application_state()
 
 

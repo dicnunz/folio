@@ -4,6 +4,7 @@ from copy import deepcopy
 import streamlit as st
 
 from demos.src.coursework_service import RepositoryError
+from folio.deadlines import preparation_notice
 from folio.planning import PlanningService, TEMPLATES
 from folio.scheduling import ScheduleService, plan_conflict_messages
 
@@ -45,6 +46,7 @@ def render_planning(repository):
         return
     revision = st.session_state.get('plan_revision', 0)
     st.caption('Suggested times are editable. Review each task before saving. Changes stay in this draft until Save plan.')
+    context = repository.preparation_contexts().get(cid)
     editor = st.empty()
     with editor.container():
         prefix = f'plan_{revision}'
@@ -59,6 +61,11 @@ def render_planning(repository):
                 item['name'] = st.text_input('Task name', task['name'], key=f'{prefix}_{index}_name')
                 item['start_time'] = st.text_input('Start (YYYY-MM-DDTHH:MM)', task['start_time'], key=f'{prefix}_{index}_start')
                 item['end_time'] = st.text_input('End (YYYY-MM-DDTHH:MM)', task['end_time'], key=f'{prefix}_{index}_end')
+                item['preparation'] = st.checkbox('Preparation for this coursework', bool(task.get('preparation')),
+                                                   key=f'{prefix}_{index}_preparation')
+                finding = preparation_notice(item, context)
+                if finding:
+                    (st.warning if finding[0] == 'late' else st.caption)(finding[1])
                 remove = st.checkbox('Remove task', key=f'{prefix}_{index}_remove')
                 edited.append(item)
                 if remove:
@@ -74,6 +81,7 @@ def render_planning(repository):
                     item = deepcopy(task)
                     for field, suffix in (('name', 'name'), ('start_time', 'start'), ('end_time', 'end')):
                         item[field] = st.session_state[f'{prefix}_{index}_{suffix}']
+                    item['preparation'] = st.session_state[f'{prefix}_{index}_preparation']
                     updated['tasks'].append(item)
                 if action == 'add':
                     updated['tasks'].append({'name': '', 'start_time': '', 'end_time': '', 'completed': False})

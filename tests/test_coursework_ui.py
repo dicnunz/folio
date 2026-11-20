@@ -61,7 +61,7 @@ def test_create_edit_optional_score_reopens(database):
     assert record["score"] is None
     reopened = launch()
     reopened.selectbox(key="coursework_picker").set_value(record["id"]).run()
-    assert [x.value for x in reopened.text_input] == ["CSE", "Essay", "2026-10-25", "", "", ""]
+    assert [x.value for x in reopened.text_input] == ["CSE", "Essay", "2026-10-25", "", "", "", ""]
     save(fill(reopened, name="Revised", score="125.5"))
     assert get_all_records(database)[0] == {**record, "item_name": "Revised", "score": 125.5}
     again = launch()

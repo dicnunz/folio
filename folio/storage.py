@@ -9,8 +9,13 @@ from pathlib import Path
 import sqlite3
 
 from demos.src.coursework_service import RepositoryError
+from demos.src.scheduling import parse_task_time
 
-SCHEMA_VERSION = 2
+from .deadlines import validate_preparation
+
+SCHEMA_VERSION = 4
+PREPARATION_CONTEXT = """SELECT c.id, c.item_name, c.due_date, d.cutoff
+    FROM coursework c LEFT JOIN preparation_cutoffs d ON d.coursework_id=c.id"""
 SCHEMA = (
     """CREATE TABLE coursework (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,6 +75,28 @@ class AcademicRepository:
                 connection.execute("""ALTER TABLE coursework ADD COLUMN end_time TEXT
                     CHECK ((start_time IS NULL AND end_time IS NULL) OR
                            (start_time IS NOT NULL AND end_time IS NOT NULL AND start_time < end_time))""")
+                version = 2
+            if version == 2:
+                connection.execute("ALTER TABLE tasks ADD COLUMN preparation INTEGER NOT NULL DEFAULT 0 CHECK(preparation IN (0,1))")
+                connection.execute("""CREATE TABLE reminders (
+                    task_id INTEGER PRIMARY KEY REFERENCES tasks(id) ON DELETE CASCADE,
+                    remind_at TEXT, revision INTEGER NOT NULL,
+                    delivered INTEGER NOT NULL DEFAULT 0 CHECK(delivered IN (0,1)))""")
+                version = 3
+            if version == 3:
+                connection.execute("""CREATE TABLE preparation_cutoffs (
+                    coursework_id INTEGER PRIMARY KEY REFERENCES coursework(id) ON DELETE CASCADE,
+                    cutoff TEXT NOT NULL)""")
+                connection.execute("ALTER TABLE reminders ADD COLUMN needs_review INTEGER NOT NULL DEFAULT 0 CHECK(needs_review IN (0,1))")
+                connection.execute("""CREATE TRIGGER reminder_time_changed
+                    AFTER UPDATE OF start_time,end_time ON tasks
+                    WHEN OLD.start_time != NEW.start_time OR OLD.end_time != NEW.end_time
+                    BEGIN UPDATE reminders SET needs_review=1,revision=revision+1
+                    WHERE task_id=NEW.id AND remind_at IS NOT NULL; END""")
+                connection.execute("""CREATE TRIGGER reminder_task_completed
+                    AFTER UPDATE OF completed ON tasks WHEN NEW.completed=1 AND OLD.completed=0
+                    BEGIN UPDATE reminders SET remind_at=NULL,needs_review=0,revision=revision+1,delivered=0
+                    WHERE task_id=NEW.id AND remind_at IS NOT NULL AND delivered=0; END""")
                 connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
             elif version != SCHEMA_VERSION:
                 raise RepositoryError(f"Unsupported database version {version}; expected {SCHEMA_VERSION}.")
@@ -112,6 +139,21 @@ class AcademicRepository:
                 raise RepositoryError("Unknown coursework storage action.")
         return saved
 
+    def preparation_contexts(self):
+        with self._read_snapshot() as connection:
+            return {row["id"]: dict(row) for row in connection.execute(PREPARATION_CONTEXT)}
+
+    def set_preparation_cutoff(self, coursework_id, value):
+        cutoff = parse_task_time(value.strip()).isoformat(timespec="minutes") if value and value.strip() else None
+        with self.transaction() as tx:
+            if tx.get(coursework_id) is None:
+                raise RepositoryError("Coursework was not found.")
+            if cutoff is None:
+                tx.connection.execute("DELETE FROM preparation_cutoffs WHERE coursework_id=?", (coursework_id,))
+            else:
+                tx.connection.execute("""INSERT INTO preparation_cutoffs(coursework_id,cutoff) VALUES (?,?)
+                    ON CONFLICT(coursework_id) DO UPDATE SET cutoff=excluded.cutoff""", (coursework_id, cutoff))
+
     def store_plan_data(self, plan, tasks=None, feedback=None):
         """Save a validated student-approved aggregate, returning saved IDs after commit.
 
@@ -134,8 +176,17 @@ class AcademicRepository:
                     raise RepositoryError("A saved plan's coursework association cannot be reassigned.")
                 connection.execute("UPDATE plans SET coursework_id=?,name=?,template_id=?,notes=?,active=? WHERE id=?", (*values, plan_id))
             if tasks is not None:
+                coursework = transaction.preparation_context(plan["coursework_id"])
+                prior = {t["id"]: t for t in connection.execute("SELECT * FROM tasks WHERE plan_id=?", (plan_id,))}
+                for task in tasks:
+                    old = prior.get(task.get("id"))
+                    candidate = {**(dict(old) if old else {}), **task}
+                    if candidate.get("preparation") and (not old or not old["preparation"] or any(
+                            candidate[key] != old[key] for key in ("start_time", "end_time"))):
+                        validate_preparation(candidate, coursework)
                 self._save_children(connection, "tasks", plan_id, tasks,
-                                    ("name", "start_time", "end_time", "completed"), {"completed": False})
+                                    ("name", "start_time", "end_time", "completed", "preparation"),
+                                    {"completed": False, "preparation": False})
             if feedback is not None:
                 self._save_children(connection, "feedback", plan_id, feedback,
                                     ("suggestion", "decision", "adapted_text"), {"decision": None, "adapted_text": None})
@@ -174,8 +225,11 @@ class AcademicRepository:
             else:
                 if record_id not in original_ids or record_id in kept:
                     raise RepositoryError(f"Unknown, repeated, or foreign {table} ID: {record_id}.")
-                assignments = ','.join(f'{field}=?' for field in fields)
-                connection.execute(f"UPDATE {table} SET {assignments} WHERE id=? AND plan_id=?", (*values, record_id, plan_id))
+                updates = [(field, value) for field, value in zip(fields, values)
+                           if not (table == "tasks" and field in ("completed", "preparation") and field not in record)]
+                assignments = ','.join(f'{field}=?' for field, _ in updates)
+                connection.execute(f"UPDATE {table} SET {assignments} WHERE id=? AND plan_id=?",
+                                   (*(value for _, value in updates), record_id, plan_id))
             kept.add(record_id)
         for record_id in original_ids - kept:
             connection.execute(f"DELETE FROM {table} WHERE id=? AND plan_id=?", (record_id, plan_id))
@@ -228,7 +282,17 @@ class CourseworkTransaction:
         return {table: [dict(row) for row in self.connection.execute(f"SELECT * FROM {table} ORDER BY id")]
                 for table in ("coursework", "plans", "tasks", "feedback")}
 
+    def preparation_context(self, coursework_id):
+        row = self.connection.execute(PREPARATION_CONTEXT + " WHERE c.id=?", (coursework_id,)).fetchone()
+        return dict(row) if row else None
+
     def update_task_times(self, task_id, start_time, end_time):
+        task = self.connection.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+        if task:
+            item = self.connection.execute(
+                PREPARATION_CONTEXT + " JOIN plans p ON c.id=p.coursework_id WHERE p.id=?", (task["plan_id"],)).fetchone()
+            if (task["start_time"], task["end_time"]) != (start_time, end_time):
+                validate_preparation({**dict(task), "start_time": start_time, "end_time": end_time}, dict(item))
         cursor = self.connection.execute(
             "UPDATE tasks SET start_time=?,end_time=? WHERE id=?", (start_time, end_time, task_id))
         if cursor.rowcount != 1:

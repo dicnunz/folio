@@ -51,7 +51,9 @@ def render_follow_through(repository, visible_task_ids, backend=None):
     st.caption('Completed' if current else 'Not complete')
     if st.button('Mark incomplete' if current else 'Mark complete', disabled=backend is None):
         try:
-            backend.set_completed(task['plan_id'], task_id, not current, expected_completed=current)
+            changed = backend.set_completed(task['plan_id'], task_id, not current, expected_completed=current)
+            if changed is False:
+                st.rerun()
             saved = repository.get_plan(task['plan_id'])
             updated = next((t for t in saved['tasks'] if t['id'] == task_id), None) if saved else None
             if updated is None or bool(updated['completed']) == current:
@@ -69,6 +71,8 @@ def render_follow_through(repository, visible_task_ids, backend=None):
         except (RepositoryError, ValueError):
             st.error('Reminder settings could not be loaded. No changes were saved.')
             return
+    if setting.get('needs_review'):
+        st.warning('The task time changed. Its previous reminder is paused. Check the time and enable it again to confirm.')
     prefix = f"reminder_{task_id}_{setting['revision']}"
     with st.form(prefix):
         enabled = st.checkbox('Enable reminder', value=setting['enabled'], disabled=backend is None)
@@ -85,3 +89,21 @@ def render_follow_through(repository, visible_task_ids, backend=None):
             st.rerun()
         except (RepositoryError, ValueError) as error:
             st.error(str(error) if isinstance(error, ValueError) else 'Reminder save could not be confirmed. Refresh and review the saved settings before trying again.')
+
+
+@st.fragment(run_every="2s")
+def render_due_reminders(backend):
+    alerts = st.session_state.setdefault("due_reminders", [])
+    try:
+        due = backend.claim_due()
+        alerts.extend(due)
+        if due:
+            st.toast(f"Task reminder: {due[0]['name']}" if len(due) == 1 else f"{len(due)} task reminders are due.", duration="long")
+    except RepositoryError:
+        st.warning("Reminders could not be checked. Folio will retry.")
+    for reminder in alerts:
+        label = "Overdue reminder" if reminder["overdue"] else "Reminder"
+        st.info(f"{label}: {reminder['name']} · {reminder['plan_name']} (task #{reminder['task_id']}, {reminder['remind_at'].replace('T', ' ')})")
+    if alerts and st.button("Dismiss reminders"):
+        st.session_state.pop("due_reminders", None)
+        st.rerun(scope="app")

@@ -14,8 +14,14 @@ def main(database_path=None, storage_caption="Saved locally on this computer.", 
         st.caption(storage_caption)
 
     try:
+        follow_through = None
         if repository is None:
             repository, coursework_service = open_application(database_path)
+            from folio.follow_through import FollowThrough
+            from folio_ui.follow_through import render_due_reminders
+
+            follow_through = FollowThrough(repository)
+            render_due_reminders(follow_through)
         else:
             repository.initialize()
             coursework_service = CourseworkService(repository)
@@ -26,7 +32,7 @@ def main(database_path=None, storage_caption="Saved locally on this computer.", 
             render_planning(repository)
         elif screen == "Schedule":
             from folio_ui.scheduling import render_schedule
-            render_schedule(repository)
+            render_schedule(repository, follow_through)
         elif screen == "Share":
             from folio_ui.sharing import render_sharing
             render_sharing(repository)
